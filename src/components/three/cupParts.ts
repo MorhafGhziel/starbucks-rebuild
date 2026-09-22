@@ -12,10 +12,10 @@ export const COLOR = {
   green: '#00754A',
   cream: '#F7F5EE',
   // light and shadow versions of the same two colours (mixes, not new hues)
-  deep: '#003B25',
-  bean: '#005C3A',
-  steel: '#C9DACF',
-  steelInk: '#A3C0AE',
+  deep: '#003B25', // green at 50% light
+  bean: '#005C3A', // green at 79% light
+  steel: '#C6DBCD', // cream 80% + green 20%
+  steelInk: '#A1C8B5', // cream 65% + green 35%
 };
 
 const radiusAt = (v: number, rBot: number, rTop: number) => rBot + (rTop - rBot) * v;
