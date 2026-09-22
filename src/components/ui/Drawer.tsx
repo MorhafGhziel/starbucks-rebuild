@@ -34,6 +34,7 @@ export function Drawer({ open, onClose, label, side = 'right', ground = 'cream',
     const html = document.documentElement;
     const prev = html.style.overflow;
     html.style.overflow = 'hidden';
+    window.__lenis?.stop();
     const t = window.setTimeout(() => {
       panel.current?.querySelector<HTMLElement>('[data-autofocus], button, a, input')?.focus();
     }, 30);
@@ -61,6 +62,7 @@ export function Drawer({ open, onClose, label, side = 'right', ground = 'cream',
       window.clearTimeout(t);
       document.removeEventListener('keydown', onKey);
       html.style.overflow = prev;
+      window.__lenis?.start();
       opener.current?.focus?.();
     };
   }, [open]);
@@ -69,7 +71,7 @@ export function Drawer({ open, onClose, label, side = 'right', ground = 'cream',
   return createPortal(
     <div className={`drawer drawer--${side}`} data-open={open} aria-hidden={!open} inert={!open}>
       <div className="drawer__scrim" onClick={onClose} />
-      <div ref={panel} className="drawer__panel" data-ground={ground} role="dialog" aria-modal="true" aria-label={label}>
+      <div ref={panel} className="drawer__panel" data-lenis-prevent data-ground={ground} role="dialog" aria-modal="true" aria-label={label}>
         <button type="button" className="icon-btn drawer__close" onClick={onClose} aria-label="Close">
           <Icon name="close" />
         </button>

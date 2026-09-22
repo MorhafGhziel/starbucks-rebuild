@@ -1,14 +1,14 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { BlobShadow, Beans, Cup, LandingDisc, Plinth, Sleeve, Studio } from './CupModels';
+import { BlobShadow, blobTexture, Beans, Cup, LandingDisc, Plinth, Sleeve, Studio } from './CupModels';
 import { cupStore } from './cupStore';
 import { measureLayout } from './flight/measure';
-import { CAM_POS, FOV, PIVOT, buildPlan, clamp01, smooth, type Plan, type Pose } from './flight/plan';
+import { CAM_POS, FOV, LAG_PX, PIVOT, buildPlan, clamp01, smooth, type Plan, type Pose } from './flight/plan';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +24,6 @@ gsap.registerPlugin(ScrollTrigger);
   GSAP ScrollTrigger owns `progress` (scrubbed); the render loop owns the rest.
 */
 
-const LAG_PX = 48; // the scrubbed cup may trail the page by at most this much
 
 type Shared = { plan: Plan | null; tween: gsap.core.Tween | null; proxy: { p: number } };
 
@@ -37,6 +36,8 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
   const landing = useRef<THREE.Group>(null);
   const shadowHero = useRef<THREE.Mesh>(null);
   const shadowLand = useRef<THREE.Mesh>(null);
+  const airShadow = useRef<THREE.Mesh>(null);
+  const { camera } = useThree();
   const shared = useRef<Shared>({ plan: null, tween: null, proxy: { p: 0 } });
   const pose = useRef<Pose>({ center: new THREE.Vector3(), quat: new THREE.Quaternion(), rock: 0, float: 0, dock: 'hero', heroW: 1, landW: 0 });
   const readied = useRef(false);
@@ -68,7 +69,7 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
       scrollTrigger: {
         start: 0,
         end: () => replan(), // re-measured on every ScrollTrigger refresh
-        scrub: reduced ? true : 0.6,
+        scrub: reduced ? true : 1.2, // slow, soft follow
         invalidateOnRefresh: true,
       },
     });
@@ -163,6 +164,19 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
     contact(pedestal.current.position, shadowHero.current);
     contact(landing.current.position, shadowLand.current);
 
+    // in the air: a soft shadow below the cup, as if cast on the page
+    const air = airShadow.current;
+    if (air) {
+      const inAir = 1 - Math.min(1, P.heroW * 3 + smooth(plan.pL2, plan.pTouch, p));
+      X.up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+      X.a.copy(camera.position).sub(place.current.position).normalize();
+      air.position.copy(place.current.position).addScaledVector(X.up, -PIVOT * k * 1.35).addScaledVector(X.a, -1.5 * k);
+      air.quaternion.copy(camera.quaternion);
+      air.scale.set(k * 2.1, k * 0.55, 1);
+      (air.material as THREE.MeshBasicMaterial).opacity = 0.34 * inAir;
+      air.visible = inAir > 0.01;
+    }
+
     if (!readied.current) {
       readied.current = true;
       requestAnimationFrame(() => onReady());
@@ -181,6 +195,10 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
         <LandingDisc />
         <BlobShadow shadowRef={shadowLand} />
       </group>
+      <mesh ref={airShadow} renderOrder={-2}>
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial map={typeof document === 'undefined' ? null : blobTexture()} transparent depthWrite={false} opacity={0} toneMapped={false} />
+      </mesh>
       <group ref={place}>
         <group ref={orient}>
           <group ref={float}>

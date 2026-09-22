@@ -24,7 +24,8 @@ export function AnchorScroll() {
       e.preventDefault();
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
       const top = el.getBoundingClientRect().top + scrollY - 96;
-      gsap.to(window, { scrollTo: { y: Math.max(0, top), autoKill: true }, duration: reduced ? 0 : Math.min(1.4, 0.5 + Math.abs(top - scrollY) / 4000), ease: 'power2.inOut' });
+      if (window.__lenis && !reduced) window.__lenis.scrollTo(Math.max(0, top), { duration: Math.min(1.6, 0.6 + Math.abs(top - scrollY) / 3500) });
+      else gsap.to(window, { scrollTo: { y: Math.max(0, top), autoKill: true }, duration: reduced ? 0 : Math.min(1.4, 0.5 + Math.abs(top - scrollY) / 4000), ease: 'power2.inOut' });
       history.pushState(null, '', url.hash);
       // move focus for keyboard and screen-reader users
       if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');

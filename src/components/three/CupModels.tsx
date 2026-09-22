@@ -264,7 +264,7 @@ export function LandingDisc() {
 }
 
 let blobTex: THREE.Texture | null = null;
-function blobTexture() {
+export function blobTexture() {
   if (blobTex) return blobTex;
   const c = document.createElement('canvas');
   c.width = c.height = 128;

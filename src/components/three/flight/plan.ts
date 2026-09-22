@@ -8,6 +8,8 @@ import { CUP } from '../cupParts';
 
 // ------------------------------------------------------------------ camera
 export const FOV = 25;
+/** the scrubbed cup may trail the scrolled page by at most this many px */
+export const LAG_PX = 110;
 export const CAM_POS = new THREE.Vector3(0, 2.4, 12);
 export const D0 = CAM_POS.length(); // view depth of the hero cup
 const TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
@@ -155,7 +157,7 @@ export function buildPlan(L: Layout) {
   const k = scaleFor(L.heroPx, D0, L.vh); // one rigid world size for the whole trip
   const Aland = L.landPx / L.heroPx;
   const dLand = D0 / Aland;
-  const lag = 48; // max px the cup may trail the page (see FlightScene)
+  const lag = LAG_PX; // max px the cup may trail the page
 
   const pTouch = 0.965; // base meets the disc; the rest is the settle
   const corr = { x0: L.corridor.x0, x1: L.corridor.x1, cx: (L.corridor.x0 + L.corridor.x1) / 2, w: L.corridor.x1 - L.corridor.x0 };
@@ -250,8 +252,8 @@ export function buildPlan(L: Layout) {
 
   // --- choreography (intent; solved densely against the real layout below)
   const H0 = docks.hero();
-  const Acor = Math.min(0.6, (corr.w * 0.62) / (L.heroPx * 0.62));
-  const sway = Math.max(0, corr.w / 2 - L.heroPx * Acor * 0.42) * 0.8;
+  // the corridor was made for the cup: fill it
+  const Acor = Math.min(1, (corr.w * 0.8) / (L.heroPx * 0.66));
   const f = (x: number) => x * pT;
 
   type K = { p: number; pref: { x: number; y: number }; A: number; pitch: number; yaw: number; bank: number };
@@ -269,11 +271,10 @@ export function buildPlan(L: Layout) {
     // recovering toward upright, steering to the corridor
     { p: f(0.86), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.75, y: L.vh * 0.46 }, A: (1 + Acor) / 2, pitch: R * 0.82, yaw: -0.25, bank: 0.2 },
     // upright, small, beside the grid
-    { p: pT, pref: { x: corr.cx, y: L.vh * 0.4 }, A: Acor, pitch: R, yaw: -0.3, bank: 0.12 },
+    { p: pT, pref: { x: corr.cx, y: L.vh * 0.45 }, A: Acor, pitch: R, yaw: -0.15, bank: 0.04 },
     // gentle S beside the cards
-    { p: pT + (pC - pT) * 0.33, pref: { x: corr.cx + sway, y: L.vh * 0.47 }, A: Acor, pitch: R + 0.08, yaw: 0.35, bank: -0.18 },
-    { p: pT + (pC - pT) * 0.66, pref: { x: corr.cx - sway, y: L.vh * 0.53 }, A: Acor, pitch: R - 0.06, yaw: -0.3, bank: 0.18 },
-    { p: pC, pref: { x: corr.cx + sway * 0.4, y: L.vh * 0.56 }, A: Acor * 1.05, pitch: R + 0.04, yaw: 0.1, bank: -0.08 },
+    // straight, calm glide beside the cards (no side-to-side)
+    { p: pC, pref: { x: corr.cx, y: L.vh * 0.52 }, A: Acor, pitch: R + 0.04, yaw: 0.15, bank: 0 },
   ];
 
   // landing approach: arc left and down into the story stage

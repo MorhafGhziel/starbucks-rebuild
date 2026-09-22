@@ -17,26 +17,8 @@ const NAV = [
 
 export function Header() {
   const bag = useBag();
-  const [hidden, setHidden] = useState(false);
   const [menu, setMenu] = useState(false);
   const [bump, setBump] = useState(false);
-
-  // hide on the way down, return on the way up
-  useEffect(() => {
-    let last = window.scrollY;
-    let raf = 0;
-    const on = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const y = window.scrollY;
-        setHidden(y > 240 && y > last + 4);
-        if (y < last - 4 || y < 240) setHidden(false);
-        last = y;
-      });
-    };
-    window.addEventListener('scroll', on, { passive: true });
-    return () => window.removeEventListener('scroll', on);
-  }, []);
 
   // a small nudge on the bag when something is added
   useEffect(() => {
@@ -49,7 +31,7 @@ export function Header() {
 
   return (
     <>
-      <header className="header" data-hidden={hidden && !menu}>
+      <header className="header">
         <div className="header__bar">
           <button type="button" className="icon-btn header__burger" onClick={() => setMenu(true)} aria-label="Open menu">
             <Icon name="menu" size={24} />
