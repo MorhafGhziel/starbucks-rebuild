@@ -67,10 +67,10 @@ check('reset clears toggles', await page.getByRole('button', { name: 'Lift the l
 const cupFocus = await page.evaluate(() => document.querySelector('.brand__cup').tabIndex);
 check('3D stage keyboard-focusable', cupFocus === 0);
 
-// goods tabs, roast filter, rail arrows, bag
+// goods carousel: tabs, roast filter, arrows, bag
 await page.evaluate(() => document.getElementById('home').scrollIntoView());
 await page.waitForTimeout(500);
-const cards = () => page.locator('#goods-panel .pcard').count();
+const cards = () => page.locator('#goods-panel [data-item]').count();
 check('whole bean shows 11', (await cards()) === 11);
 await page.getByRole('button', { name: 'Dark', exact: true }).click();
 await page.waitForTimeout(300);
@@ -78,14 +78,16 @@ check('roast filter Dark shows 4', (await cards()) === 4, String(await cards()))
 await page.getByRole('tab', { name: /Drinkware/ }).click();
 await page.waitForTimeout(300);
 check('drinkware tab shows 8', (await cards()) === 8, String(await cards()));
-const prev = page.getByRole('button', { name: 'Previous products' });
-check('rail prev disabled at start', await prev.isDisabled());
-await page.getByRole('button', { name: 'Next products' }).click();
-await page.waitForTimeout(900);
-check('rail next scrolls', (await page.evaluate(() => document.getElementById('goods-panel').scrollLeft)) > 100);
-
-await page.locator('#goods-panel .pcard').first().getByRole('button', { name: 'Add to bag' }).click();
-await page.locator('#goods-panel .pcard').nth(1).getByRole('button', { name: 'Add to bag' }).click();
+const prev = page.getByRole('button', { name: 'Previous product' });
+check('carousel prev disabled at start', await prev.isDisabled());
+const firstName = await page.locator('.flow__name').textContent();
+await page.getByRole('button', { name: 'Next product' }).click();
+await page.waitForTimeout(800);
+check('carousel next changes product', (await page.locator('.flow__name').textContent()) !== firstName);
+await page.locator('.flow__actions').getByRole('button', { name: 'Add to bag' }).click();
+await page.getByRole('button', { name: 'Next product' }).click();
+await page.waitForTimeout(700);
+await page.locator('.flow__actions').getByRole('button', { name: 'Add to bag' }).click();
 await page.waitForTimeout(300);
 const bagBtn = page.locator('.header__bag');
 check('bag count = 2', (await bagBtn.getAttribute('aria-label')).includes('2 items'));

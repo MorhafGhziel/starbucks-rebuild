@@ -274,3 +274,40 @@
   .footer__brand, .footer__cols { grid-column: 1 / -1; }
   .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ------------------------------------------------ take-it-home carousel */
+.goods__roasts { margin: -16px 0 8px; }
+.flow { --w: clamp(220px, 26vw, 360px); --gap: calc(var(--w) * 0.78 + 40px); position: relative; height: calc(var(--w) * 1.25 + 90px); margin-top: 24px; overflow: hidden; touch-action: pan-y; outline-offset: -6px; user-select: none; }
+.flow__stage { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.flow__item {
+  position: absolute; left: 50%; top: 20px; width: var(--w); aspect-ratio: 4 / 5; margin-left: calc(var(--w) / -2);
+  cursor: pointer;
+  transform: translateX(calc(var(--o) * var(--gap))) scale(calc(1 - min(var(--a), 1) * 0.5));
+  filter: blur(calc(min(var(--a), 3) * 4px)) saturate(calc(1 - min(var(--a), 1) * 0.25));
+  opacity: calc(1 - min(var(--a), 4) * 0.2);
+  z-index: calc(10 - var(--a));
+  transition: transform 700ms var(--ease-out), filter 700ms var(--ease-out), opacity 700ms var(--ease-out);
+  will-change: transform, filter;
+}
+.flow__item[data-active='true'] { cursor: zoom-in; }
+.flow__tile { position: absolute; inset: 0; border-radius: var(--r-lg); overflow: hidden; transition: box-shadow 700ms var(--ease-out); }
+.flow__tile[data-ground='cream'] { box-shadow: inset 0 0 0 1.5px var(--line); }
+.flow__item[data-active='true'] .flow__tile { box-shadow: 0 40px 70px -40px color-mix(in oklab, var(--green) 70%, transparent); }
+.flow__tile img { object-fit: cover; pointer-events: none; }
+.flow__arrow { position: absolute; top: 50%; z-index: 20; margin-top: -24px; background: var(--cream); }
+.flow__arrow--prev { left: calc(50% - var(--w) / 2 - 72px); }
+.flow__arrow--next { left: calc(50% + var(--w) / 2 + 24px); }
+.flow__info { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 8px var(--gutter) 0; animation: rise 500ms var(--ease-out) both; }
+.flow__name { font-size: clamp(24px, 2.2vw, 32px); max-width: 22ch; }
+.flow__note { max-width: 44ch; font-size: 15px; }
+.flow__price { display: flex; gap: 10px; align-items: baseline; font-size: 14px; color: var(--soft); }
+.flow__price strong { font-size: 20px; color: var(--fg); }
+.flow__actions { display: flex; gap: 20px; align-items: center; margin-top: 4px; }
+.flow__count { margin-top: 4px; }
+@media (max-width: 700px) {
+  .flow { --w: 58vw; --gap: calc(var(--w) * 0.78 + 14px); }
+  .flow__arrow--prev { left: 8px; }
+  .flow__arrow--next { left: auto; right: 8px; }
+  .goods__roasts { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+}
+@media (prefers-reduced-motion: reduce) { .flow__item { transition: none; } }
