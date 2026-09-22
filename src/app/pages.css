@@ -1,0 +1,31 @@
+/* ------------------------------------------------------- inner pages */
+.page-head { position: relative; padding: clamp(140px, 16vw, 200px) 0 clamp(56px, 7vw, 88px); }
+.page-head .shell { display: grid; gap: 20px; }
+.page-head__title { font-size: clamp(56px, 9vw, 128px); }
+.section--tight { padding-top: clamp(48px, 6vw, 72px); }
+
+.catalog { display: grid; gap: 20px; }
+.catalog__bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+.search {
+  display: flex; align-items: center; gap: 10px; flex: 1 1 320px; max-width: 460px; min-height: 52px; padding: 0 8px 0 18px;
+  border-radius: 999px; border: 1.5px solid var(--line); background: var(--cream);
+  transition: border-color var(--t-hover) var(--ease);
+}
+.search:focus-within { border-color: var(--fg); outline: 2.5px solid var(--fg); outline-offset: 2px; }
+.search input { flex: 1; min-width: 0; border: 0; background: none; outline: 0; font-size: 16px; min-height: 48px; }
+.search input::-webkit-search-cancel-button { display: none; }
+.search__clear { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--fill); }
+.catalog__count { font-size: 15px; color: var(--soft); display: flex; align-items: center; gap: 12px; min-height: 44px; }
+.catalog__grid { list-style: none; margin: 0; padding: 0; }
+.shop__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px clamp(16px, 2vw, 28px); }
+.catalog__empty { display: grid; gap: 12px; justify-items: start; padding: 48px 32px; border-radius: var(--r-lg); border: 1.5px dashed var(--line); }
+.catalog__note { margin-top: 48px; }
+@media (max-width: 1100px) { .shop__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .shop__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 14px; } .shop__grid .pcard__name { font-size: 18px; } }
+
+.credits { display: grid; gap: 32px; max-width: 900px; }
+.credits__table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.credits__table th, .credits__table td { text-align: left; vertical-align: top; padding: 14px 16px 14px 0; border-bottom: 1.5px solid var(--line); }
+.credits__table th { font-size: 13px; color: var(--soft); font-weight: 600; }
+.credits__table td:first-child { font-weight: 700; width: 38%; }
+.credits__table .link { min-height: 0; font-weight: 500; }
