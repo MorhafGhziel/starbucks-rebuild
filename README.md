@@ -33,7 +33,7 @@ npm run build && npm start   # production build on the same port
 
 ## Pipelines (`tools/`)
 - `products.mjs`, `drinks.mjs`: rebuild `src/data/*.json` from the official feeds.
-- `duotone.mjs`, `photos.mjs`: map every photo onto the green → cream ramp. Studio backgrounds land exactly on a site colour.
+- `realcolor.mjs`: real-colour images; only flat studio backgrounds are shifted onto the site green/cream so tiles stay seamless. (`duotone.mjs` / `photos.mjs` make the earlier green-and-cream versions.)
 - `posters.mjs`: renders the transparent poster images the 3D stages fall back to.
 - `interact.mjs`: 56 interaction, layout and fallback checks against a running server.
 - `shot.mjs`, `sections.mjs`, `states.mjs`: screenshots for review.

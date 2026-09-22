@@ -175,7 +175,7 @@ export const SOURCES = [
   ['Tasting notes and roast levels', 'Printed on each bag, read from the official product photos', LINKS.shop],
   ['Siren logo', 'SVG served on starbucks.com, geometry unchanged, recolored', 'https://www.starbucks.com/'],
   ['Coffee journey facts', 'about.starbucks.com stories', LINKS.beanToCup],
-  ['Editorial photography', 'about.starbucks.com story images, duotoned', LINKS.about],
+  ['Editorial photography', 'about.starbucks.com story images, in their real colors', LINKS.about],
 ] as const;
 
 export const fmtPrice = (p: string) => `$${Number(p).toFixed(2)}`;

@@ -48,7 +48,7 @@ export default function CreditsPage() {
                 </tr>
                 <tr>
                   <td>Photo treatment</td>
-                  <td>Every photo is mapped onto the two site colors, #00754A and #F7F5EE</td>
+                  <td>Photos keep their real colors; only the plain studio backgrounds are matched to the site green and cream</td>
                 </tr>
                 <tr>
                   <td>Type</td>
