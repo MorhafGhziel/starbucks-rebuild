@@ -1,30 +1,33 @@
-// Captures the live 3D stages as transparent PNG posters (the no-WebGL /
-// loading fallback), at 2x, so the fallback matches the real render.
+// Renders the poster images each cup anchor shows before (or without) WebGL,
+// straight from the live flight scene at rest, so the hand-off is invisible.
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
-const browser = await chromium.launch({
+const b = await chromium.launch({
   executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
   args: ['--headless=new', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'],
 });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
-await page.goto('http://localhost:3970/', { waitUntil: 'networkidle' });
-
-async function grab(selector, out, before) {
-  await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'center' }), selector);
-  if (before) await page.evaluate(before);
-  await page.waitForTimeout(5200);
-  const style = await page.addStyleTag({
-    content: `html,body,main>section,.brand,.hero{background:transparent !important}
-      .cup-stage__poster,.header,.ring,.hero__copy,.brand__copy,.wave{visibility:hidden !important}`,
-  });
-  const buf = await page.locator(selector).screenshot({ omitBackground: true });
-  await style.evaluate((n) => n.remove());
-  await sharp(buf).png({ compressionLevel: 9, palette: false }).toFile(out);
-  const m = await sharp(out).metadata();
-  console.log(out, m.width, m.height, m.hasAlpha);
+const page = await b.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+await page.goto('http://localhost:3970/?still', { waitUntil: 'networkidle' });
+await page.addStyleTag({
+  content: `html,body,main>section,.brand,.hero,.footer{background:transparent !important}
+    body>*:not(.cup-flight-layer){visibility:hidden !important}`,
+});
+async function grab(anchor, scrollTo, out) {
+  await page.evaluate((y) => window.scrollTo(0, y), scrollTo);
+  await page.waitForTimeout(3500);
+  const r = await page.evaluate((a) => {
+    const b = document.querySelector(`[data-cup-anchor="${a}"]`).getBoundingClientRect();
+    return { x: b.left, y: b.top, width: b.width, height: b.height };
+  }, anchor);
+  const buf = await page.screenshot({ omitBackground: true, clip: r });
+  await sharp(buf).png({ compressionLevel: 9 }).toFile(out);
+  console.log(out, r);
 }
-
-await grab('.hero__cup', 'public/renders/cup-hero.png');
-await grab('.brand__cup', 'public/renders/cup-inspect.png');
-await browser.close();
+await grab('hero', 0, 'public/renders/cup-hero.png');
+const s1 = await page.evaluate(() => {
+  const el = document.querySelector('[data-cup-anchor="brand"]').getBoundingClientRect();
+  return Math.round(el.top + scrollY + el.height / 2 - innerHeight / 2);
+});
+await grab('brand', s1, 'public/renders/cup-inspect.png');
+await b.close();

@@ -6,6 +6,13 @@
 @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 /* ---------------------------------------------------------------- menu */
+/* the cup flies down a free band on the right of this section; nothing
+   in the menu may enter it (measured at runtime by the flight planner) */
+.menu { --corridor: clamp(240px, 22vw, 420px); }
+.menu > .shell { padding-right: calc(var(--gutter) + var(--corridor)); }
+.menu .section__head { flex-direction: column; align-items: flex-start; gap: 20px; }
+@media (max-width: 1100px) { .menu { --corridor: 27vw; } }
+@media (max-width: 700px) { .menu { --corridor: 116px; } }
 .menu__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); min-height: 200px; }
 .menu__cell { animation: rise var(--t-swap) var(--ease-out) both; animation-delay: calc(var(--i) * 55ms); }
 .dcard { position: relative; display: grid; gap: 6px; }
@@ -18,7 +25,15 @@
 .dcard__open:focus-visible::after { outline: 2.5px solid var(--green); outline-offset: 4px; }
 .dcard__meta { font-size: 15px; color: var(--soft); }
 @media (max-width: 1000px) { .menu__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .menu__grid { gap: 14px; } .dcard__tile { border-radius: var(--r-md); } .dcard__name { font-size: 19px; } }
+@media (max-width: 700px) {
+  /* phones: one clean column of drink rows */
+  .menu__grid { grid-template-columns: 1fr; gap: 14px; }
+  .dcard { grid-template-columns: 92px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; align-items: center; align-content: center; }
+  .dcard__tile { grid-row: 1 / span 2; margin: 0; border-radius: 18px; }
+  .dcard__name { font-size: 19px; align-self: end; }
+  .dcard__meta { font-size: 13.5px; align-self: start; }
+  .dcard__open::after { border-radius: 18px; }
+}
 
 /* drawer detail (drink + product) */
 .detail { display: grid; }

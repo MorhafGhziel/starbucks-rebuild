@@ -20,7 +20,10 @@ type Props = {
 export function CupAnchor({ name, poster, posterAlt, label, className }: Props) {
   const drag = useRef<{ x: number; y: number; yaw: number; id: number; axis: 'x' | 'y' | null } | null>(null);
 
+  // the cup can only be turned while it rests here, not mid-flight
+  const here = () => (name === 'hero' ? cupStore.flight < 0.01 : cupStore.flight > 0.99);
   const onDown = (e: React.PointerEvent) => {
+    if (!here()) return;
     drag.current = { x: e.clientX, y: e.clientY, yaw: cupStore.yaw, id: e.pointerId, axis: e.pointerType === 'mouse' ? 'x' : null };
     if (e.pointerType === 'mouse') (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -43,6 +46,7 @@ export function CupAnchor({ name, poster, posterAlt, label, className }: Props) 
     drag.current = null;
   };
   const onKey = (e: React.KeyboardEvent) => {
+    if (!here()) return;
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
       cupStore.touched = true;

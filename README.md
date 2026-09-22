@@ -36,6 +36,13 @@ npm run build && npm start   # production build on the same port
 - `realcolor.mjs`: real-colour images; only flat studio backgrounds are shifted onto the site green/cream so tiles stay seamless. (`duotone.mjs` / `photos.mjs` make the earlier green-and-cream versions.)
 - `posters.mjs`: rendered the transparent poster images the cup anchors show before WebGL is ready or when it isn't available (written for the earlier per-section canvases; the posters still match the resting states).
 - `flight.mjs`: captures the cup's trip from hero to “One store” as a scroll sequence.
+- `flight-check.mjs`: samples the planned flight 500× at 7 viewports and reports any moment the cup's projected bounds touch protected content, the header band or a screen edge (needs the dev server; uses `?flight-debug`).
+- `flight-debug.mjs`: stills with the development guides (path, projected bounds, protected regions, corridor, landing anchor). Open `/?flight-debug` in a browser to see them live.
+- `record.mjs`: records real scrolling (slow, pause, reverse, fast, landing, ride-away) to `shots/rec-<width>.webm`.
+- `edge.mjs`: reload mid-flight, deep-link to a later section, resize mid-flight.
+
+### How the flight works
+`src/components/three/flight/` holds it. `measure.ts` reads the page once per layout change (anchors, pedestal, landing disc, protected blocks, the free corridor beside the menu). `plan.ts` turns that into a flight. It works in screen space plus real view depth, and derives phase timing from where the menu actually is. Intent keys (lift → close-up tumble → upside down → corridor S-drift → approach → touchdown) are solved densely against the protected regions, then refined until no sample collides. Rotation is built every frame from continuous angles (a 2π pitch is a real end-over-end turn), so no quaternion endpoints are interpolated. `FlightScene.tsx` binds GSAP ScrollTrigger (scrub 0.6) to progress. It caps the lag at 48px so fast scrolling can't slide content under a trailing cup, and applies the pose through nested groups: path, orientation, float, pivot, settle.
 - `interact.mjs`: 56 interaction, layout and fallback checks against a running server.
 - `shot.mjs`, `sections.mjs`, `states.mjs`: screenshots for review.
 

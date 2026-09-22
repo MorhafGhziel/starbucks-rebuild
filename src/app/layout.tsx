@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Young_Serif, Figtree } from 'next/font/google';
 import { BagProvider } from '@/components/bag/BagProvider';
+import { AnchorScroll } from '@/components/layout/AnchorScroll';
 import './globals.css';
 import './sections.css';
 import './pages.css';
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <a className="skip" href="#main">Skip to content</a>
         <BagProvider>{children}</BagProvider>
+        <AnchorScroll />
       </body>
     </html>
   );

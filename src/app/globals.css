@@ -59,9 +59,6 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 96px;
 }
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-}
 body {
   margin: 0;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
@@ -268,12 +265,14 @@ p { text-wrap: pretty; }
 /* ---------------------------------------------------------------- 3D stage */
 .cup-stage { position: relative; outline-offset: -6px; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
 .cup-stage:active { cursor: grabbing; }
-.cup-stage__poster { object-fit: contain; transition: opacity 600ms var(--ease); }
-html[data-cup='live'] .cup-stage__poster { opacity: 0; }
+/* the poster is sized like the live cup (by the anchor's height, centred), so
+   the swap to 3D is a straight cut with nothing moving */
+.cup-stage__poster { width: auto !important; max-width: none; height: 100% !important; left: 50% !important; transform: translateX(-50%); }
+html[data-cup='live'] .cup-stage__poster { visibility: hidden; }
 
 /* the one travelling cup: a fixed layer above the page, below the header;
    it never takes clicks, so the anchors and cards underneath still work */
-.cup-flight-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 700ms var(--ease); }
+.cup-flight-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; }
 html[data-cup='live'] .cup-flight-layer { opacity: 1; }
 .cup-flight-layer[data-active='false'] { visibility: hidden; }
 .cup-flight-layer, .cup-flight-layer * { pointer-events: none !important; }
@@ -308,3 +307,5 @@ html[data-cup='live'] .cup-flight-layer { opacity: 1; }
   .hero__stage { grid-column: 1; grid-row: 2; height: min(66svh, 560px); min-height: 400px; margin: 8px calc(var(--gutter) * -1) 0; }
   .hero__ring { left: auto; right: 6%; bottom: 8%; width: 96px; }
 }
+
+main > section:focus { outline: none; }

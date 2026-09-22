@@ -241,3 +241,52 @@ export function Studio() {
     </>
   );
 }
+
+/** The receiving surface in the story section: a slim cream disc. */
+export function LandingDisc() {
+  const geo = useMemo(() => {
+    const r = 1.2;
+    const h = 0.16;
+    const b = 0.05;
+    const pts: THREE.Vector2[] = [new THREE.Vector2(0, -h), new THREE.Vector2(r - b, -h)];
+    for (let i = 0; i <= 6; i++) {
+      const a = -Math.PI / 2 + (i / 6) * Math.PI;
+      pts.push(new THREE.Vector2(r - b + Math.cos(a) * b, -h / 2 + Math.sin(a) * (h / 2)));
+    }
+    pts.push(new THREE.Vector2(0, 0));
+    return new THREE.LatheGeometry(pts, 128);
+  }, []);
+  return (
+    <mesh geometry={geo}>
+      <meshPhysicalMaterial color={COLOR.cream} roughness={0.8} />
+    </mesh>
+  );
+}
+
+let blobTex: THREE.Texture | null = null;
+function blobTexture() {
+  if (blobTex) return blobTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(0,59,37,1)');
+  grd.addColorStop(0.45, 'rgba(0,59,37,0.55)');
+  grd.addColorStop(1, 'rgba(0,59,37,0)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 128, 128);
+  blobTex = new THREE.CanvasTexture(c);
+  blobTex.colorSpace = THREE.SRGBColorSpace;
+  return blobTex;
+}
+
+/** Soft contact shadow whose size and strength the flight drives each frame. */
+export function BlobShadow({ shadowRef }: { shadowRef: React.RefObject<THREE.Mesh | null> }) {
+  const map = useMemo(() => (typeof document === 'undefined' ? null : blobTexture()), []);
+  return (
+    <mesh ref={shadowRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} renderOrder={1}>
+      <planeGeometry args={[2.2, 2.2]} />
+      <meshBasicMaterial map={map} transparent depthWrite={false} opacity={0} toneMapped={false} />
+    </mesh>
+  );
+}

@@ -41,6 +41,9 @@ export function CupFlight() {
   const gl = useWebGL();
   const reduced = useReducedMotion();
   const [active, setActive] = useState(true);
+  const debug = useSyncExternalStore(noop, () => new URLSearchParams(location.search).has('flight-debug'), () => false);
+  // ?still freezes idle motion (used to render the matching poster images)
+  const still = useSyncExternalStore(noop, () => new URLSearchParams(location.search).has('still'), () => false);
 
   // render only while the cup can be on screen (until "One store" has scrolled away)
   useEffect(() => {
@@ -67,7 +70,7 @@ export function CupFlight() {
   if (!gl) return null;
   return (
     <div className="cup-flight-layer" aria-hidden="true" data-active={active}>
-      <FlightScene active={active} reduced={reduced} onReady={() => (document.documentElement.dataset.cup = 'live')} />
+      <FlightScene active={active} reduced={reduced} still={still} debug={debug} onReady={() => (document.documentElement.dataset.cup = 'live')} />
     </div>
   );
 }
