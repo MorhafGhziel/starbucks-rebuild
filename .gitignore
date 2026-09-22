@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
+.vercel
+# scraped reference material: kept locally, not redistributed
+research/
+# local screenshots from checks
+shots/
