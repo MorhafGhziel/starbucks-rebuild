@@ -314,3 +314,27 @@ main > section:focus { outline: none; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: clip; }
+
+/* ------------------------------------------------------------ cursor */
+.cursor-dot, .cursor-ring { position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 200ms linear; }
+.cursor-dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--c); transition: opacity 200ms linear, width 250ms var(--ease-out), height 250ms var(--ease-out), margin 250ms var(--ease-out); }
+.cursor-ring {
+  width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%;
+  border: 1.5px solid var(--c); display: grid; place-items: center;
+  transition: opacity 200ms linear, width 350ms var(--ease-out), height 350ms var(--ease-out), margin 350ms var(--ease-out), background-color 300ms var(--ease-out), border-color 300ms var(--ease-out);
+}
+.cursor-ring span { font: 700 12px/1 var(--font-sans), sans-serif; letter-spacing: 0.02em; color: var(--c2); opacity: 0; transition: opacity 200ms linear; }
+html { --c: var(--green); --c2: var(--cream); }
+html[data-cursor-ground='green'] { --c: var(--cream); --c2: var(--green); }
+.cursor-ring[data-mode='hot'] { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: color-mix(in oklab, var(--c) 14%, transparent); }
+.cursor-dot[data-mode='hot'] { width: 0; height: 0; margin: 0; }
+.cursor-ring[data-mode='drag'] { width: 72px; height: 72px; margin: -36px 0 0 -36px; background: var(--green); border-color: var(--cream); }
+.cursor-ring[data-mode='drag'] span { color: var(--cream); }
+.cursor-ring[data-mode='drag'] span { opacity: 1; }
+.cursor-dot[data-mode='drag'] { width: 0; height: 0; margin: 0; }
+.cursor-ring[data-mode='text'], .cursor-dot[data-mode='text'] { opacity: 0 !important; }
+.cursor-ring.is-down { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+@media (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+  html.has-cursor input, html.has-cursor textarea { cursor: text !important; }
+}

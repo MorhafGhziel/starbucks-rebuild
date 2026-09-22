@@ -3,6 +3,7 @@ import { Young_Serif, Figtree } from 'next/font/google';
 import { BagProvider } from '@/components/bag/BagProvider';
 import { AnchorScroll } from '@/components/layout/AnchorScroll';
 import { SmoothScroll } from '@/components/layout/SmoothScroll';
+import { Cursor } from '@/components/layout/Cursor';
 import './globals.css';
 import './sections.css';
 import './pages.css';
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BagProvider>{children}</BagProvider>
         <AnchorScroll />
         <SmoothScroll />
+        <Cursor />
       </body>
     </html>
   );
