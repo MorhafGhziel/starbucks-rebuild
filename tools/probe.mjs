@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const [url, js, w = '1440', h = '900'] = process.argv.slice(2);
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--headless=new', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+page.on('console', (m) => console.log('console.' + m.type(), m.text().slice(0, 300)));
+page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
+await page.goto(url, { waitUntil: 'networkidle' });
+await page.waitForTimeout(4000);
+console.log(JSON.stringify(await page.evaluate(js), null, 1));
+await browser.close();
