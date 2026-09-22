@@ -272,7 +272,7 @@ html[data-cup='live'] .cup-stage__poster { visibility: hidden; }
 
 /* the one travelling cup: a fixed layer above the page, below the header;
    it never takes clicks, so the anchors and cards underneath still work */
-.cup-flight-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; }
+.cup-flight-layer { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 30; pointer-events: none; opacity: 0; }
 html[data-cup='live'] .cup-flight-layer { opacity: 1; }
 .cup-flight-layer[data-active='false'] { visibility: hidden; }
 .cup-flight-layer, .cup-flight-layer * { pointer-events: none !important; }

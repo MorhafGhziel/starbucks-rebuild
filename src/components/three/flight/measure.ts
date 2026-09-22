@@ -15,7 +15,8 @@ function doc(el: Element | null, sy: number): Box | null {
 
 export function measureLayout(): Layout | null {
   const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  // the 3D layer is 100lvh tall (stable while mobile URL bars move); measure that
+  const vh = (document.querySelector('.cup-flight-layer') as HTMLElement | null)?.clientHeight || window.innerHeight;
   const sy = window.scrollY;
   const mobile = vw < 700;
 

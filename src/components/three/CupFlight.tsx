@@ -40,6 +40,16 @@ function useWebGL() {
 export function CupFlight() {
   const gl = useWebGL();
   const reduced = useReducedMotion();
+  // phones, tablets and touch screens get a simpler scroll: no flight across the page
+  const simple = useSyncExternalStore(
+    (cb) => {
+      const m = window.matchMedia('(max-width: 1023px), (pointer: coarse)');
+      m.addEventListener('change', cb);
+      return () => m.removeEventListener('change', cb);
+    },
+    () => window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches,
+    () => false,
+  );
   const [active, setActive] = useState(true);
   const debug = useSyncExternalStore(noop, () => new URLSearchParams(location.search).has('flight-debug'), () => false);
   // ?still freezes idle motion (used to render the matching poster images)
@@ -70,7 +80,7 @@ export function CupFlight() {
   if (!gl) return null;
   return (
     <div className="cup-flight-layer" aria-hidden="true" data-active={active}>
-      <FlightScene active={active} reduced={reduced} still={still} debug={debug} onReady={() => (document.documentElement.dataset.cup = 'live')} />
+      <FlightScene active={active} reduced={reduced} simple={simple} still={still} debug={debug} onReady={() => (document.documentElement.dataset.cup = 'live')} />
     </div>
   );
 }

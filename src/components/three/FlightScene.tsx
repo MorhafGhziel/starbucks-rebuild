@@ -11,6 +11,8 @@ import { measureLayout } from './flight/measure';
 import { CAM_POS, FOV, PIVOT, buildPlan, lagFor, clamp01, smooth, type Plan, type Pose } from './flight/plan';
 
 gsap.registerPlugin(ScrollTrigger);
+// mobile URL bars showing/hiding must not re-measure the page mid-scroll
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /*
   Ownership of transforms (nothing else writes these):
@@ -27,7 +29,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 type Shared = { plan: Plan | null; tween: gsap.core.Tween | null; proxy: { p: number } };
 
-function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: boolean; debug: boolean; onReady: () => void }) {
+function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; simple: boolean; still: boolean; debug: boolean; onReady: () => void }) {
   const place = useRef<THREE.Group>(null);
   const orient = useRef<THREE.Group>(null);
   const float = useRef<THREE.Group>(null);
@@ -112,6 +114,25 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
     const lag = lagFor(L.vh) / L.s1;
     let p = Math.min(raw + lag, Math.max(raw - lag, S.proxy.p));
     if (reduced) p = raw < 0.5 ? 0 : 1;
+
+    // simple mode (phones / tablets / touch): the cup stays glued to its section
+    // and never trails the scroll. In the hero it turns gently as you scroll;
+    // in "One store" it drops onto its disc with one turn as the section arrives.
+    let extraY = 0;
+    let extraYaw = 0;
+    if (simple) {
+      const landY = L.landFoot.y - scroll;
+      p = landY < L.vh * 1.35 ? 1 : 0;
+      if (!reduced) {
+        if (p === 1) {
+          const e = smooth(L.vh * 1.3, L.vh * 0.6, landY);
+          extraY = (1 - e) * 1.6;
+          extraYaw = (1 - e) * Math.PI * 2;
+        } else {
+          extraYaw = clamp01(scroll / Math.max(1, L.heroFoot.y)) * 1.4;
+        }
+      }
+    }
     cupStore.flight = p;
 
     const P = plan.evaluate(p, scroll, pose.current);
@@ -125,10 +146,11 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
       const home = Math.round(cupStore.yaw / (Math.PI * 2)) * Math.PI * 2;
       cupStore.yaw = THREE.MathUtils.damp(cupStore.yaw, home, 3, dt);
     }
-    let userYaw = cupStore.yaw * docked;
+    let userYaw = cupStore.yaw * docked + extraYaw;
     if (!cupStore.touched && !reduced && !still) userYaw += Math.sin(clock.elapsedTime * 0.45) * 0.38 * P.heroW;
 
     place.current.position.copy(P.center);
+    place.current.position.y += extraY * k;
     place.current.scale.setScalar(k);
     X.qUser.setFromAxisAngle(X.Y, userYaw);
     orient.current.quaternion.copy(P.quat).multiply(X.qUser);
@@ -167,7 +189,7 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
     // in the air: a soft shadow below the cup, as if cast on the page
     const air = airShadow.current;
     if (air) {
-      const inAir = 1 - Math.min(1, P.heroW * 3 + smooth(plan.pL2, plan.pTouch, p));
+      const inAir = simple ? 0 : 1 - Math.min(1, P.heroW * 3 + smooth(plan.pL2, plan.pTouch, p));
       X.up.set(0, 1, 0).applyQuaternion(camera.quaternion);
       X.a.copy(camera.position).sub(place.current.position).normalize();
       air.position.copy(place.current.position).addScaledVector(X.up, -PIVOT * k * 1.35).addScaledVector(X.a, -1.5 * k);
@@ -261,7 +283,7 @@ function drawDebug(plan: Plan, p: number, scroll: number) {
   g.fillText(`p ${p.toFixed(3)}  pT ${plan.pT.toFixed(2)}  pC ${plan.pC.toFixed(2)}  ${cur.hits.join(', ')}`, 14, L.vh - 14);
 }
 
-export default function FlightScene({ reduced, still = false, active, onReady, debug }: { reduced: boolean; still?: boolean; active: boolean; onReady: () => void; debug: boolean }) {
+export default function FlightScene({ reduced, simple = false, still = false, active, onReady, debug }: { reduced: boolean; simple?: boolean; still?: boolean; active: boolean; onReady: () => void; debug: boolean }) {
   return (
     <Canvas
       className="cup-flight"
@@ -273,7 +295,7 @@ export default function FlightScene({ reduced, still = false, active, onReady, d
       onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
     >
       <Studio />
-      <Rig reduced={reduced} still={still} debug={debug} onReady={onReady} />
+      <Rig reduced={reduced} simple={simple} still={still} debug={debug} onReady={onReady} />
     </Canvas>
   );
 }
