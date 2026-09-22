@@ -77,7 +77,12 @@ export function Footer() {
           </nav>
         </div>
         <div className="footer__bottom">
-          <p className="footer__concept">Independent concept redesign. Not affiliated with Starbucks.</p>
+          <p className="footer__concept">
+            Independent concept redesign. Not affiliated with Starbucks. Built by{' '}
+            <a className="footer__sima" href="https://www.simastudio.it.com" target="_blank" rel="noreferrer">
+              SIMA Studio
+            </a>
+          </p>
           <ul className="footer__legal">
             <li>
               <Link href="/credits">Sources and credits</Link>
