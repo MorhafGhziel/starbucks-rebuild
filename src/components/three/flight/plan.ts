@@ -245,7 +245,7 @@ export function buildPlan(L: Layout) {
 
   // --- phase boundaries, from where things actually are
   const mob = L.mobile;
-  const Abig = L.vw < 700 ? 1.05 : L.vw < 1100 ? 1.15 : 1.3;
+  const Abig = L.vw < 700 ? 1 : L.vw < 1100 ? 1.15 : 1.3;
   // is there room for the big tumble beside the menu heading, or must it end before the heading arrives?
   const roomBeside = L.vw - L.edge - L.menuHeadRight - L.clear > L.heroPx * Abig * 0.8;
   const tumbleEnd = roomBeside ? L.gridTop - L.vh * 0.45 : L.menuHeadTop - L.vh * 0.55;
@@ -256,27 +256,33 @@ export function buildPlan(L: Layout) {
   const H0 = docks.hero();
   // the corridor was made for the cup: fill it
   const Acor = Math.min(1, (corr.w * 0.8) / (L.heroPx * 0.66));
-  const f = (x: number) => x * pT;
+  // phones: the cup rides on its pedestal with the page until there is room
+  // above it (the hero text has scrolled away), and only then lifts off
+  const pLift = mob ? Math.min(pT * 0.45, Math.max(0, (L.heroFoot.y - L.vh * 0.62) / L.s1)) : 0;
+  const f = (x: number) => pLift + x * (pT - pLift);
 
   type K = { p: number; pref: { x: number; y: number }; A: number; pitch: number; yaw: number; bank: number };
-  const R = Math.PI * 2;
+  // desktop: one full end-over-end tumble (pitch). Phones have no room for it,
+  // so the cup makes one calm full turn on its own axis instead (yaw).
+  const R = mob ? 0 : Math.PI * 2;
+  const TY = mob ? Math.PI * 2 : 0;
   // the big moment sits in the middle of the space the hero copy and menu heading leave free
   const freeLeft = Math.max(L.heroCopyRight, roomBeside ? L.menuHeadRight : 0) + L.clear;
   const wantedMid = mob ? L.vw * 0.5 : (freeLeft + L.vw - L.edge) / 2;
   const K: K[] = [
     // 0–10%: lift clear, tilt back, drift aside
-    { p: f(0.28), pref: { x: H0.x + (mob ? 10 : 40), y: H0.y - L.heroPx * 0.26 }, A: 1.14, pitch: -0.2, yaw: 0.25, bank: 0.08 },
+    { p: f(0.28), pref: { x: H0.x + (mob ? 10 : 40), y: mob ? H0.y - f(0.28) * L.s1 - L.heroPx * 0.22 : H0.y - L.heroPx * 0.26 }, A: mob ? 1.02 : 1.14, pitch: mob ? -0.1 : -0.2, yaw: mob ? TY * 0.12 : 0.25, bank: mob ? 0.04 : 0.08 },
     // broad arc toward the camera, tumble begins
-    { p: f(0.5), pref: { x: wantedMid, y: L.vh * 0.5 }, A: Abig, pitch: 1.05, yaw: 0.5, bank: -0.26 },
+    { p: f(0.5), pref: { x: wantedMid, y: L.vh * 0.5 }, A: Abig, pitch: mob ? 0.16 : 1.05, yaw: mob ? TY * 0.4 : 0.5, bank: mob ? -0.08 : -0.26 },
     // upside down, receding
-    { p: f(0.7), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.3, y: L.vh * 0.5 }, A: (Abig + 1) / 2 + 0.05, pitch: Math.PI, yaw: 0.2, bank: -0.1 },
+    { p: f(0.7), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.3, y: L.vh * 0.5 }, A: (Abig + 1) / 2 + 0.05, pitch: mob ? 0.08 : Math.PI, yaw: mob ? TY * 0.68 : 0.2, bank: mob ? -0.04 : -0.1 },
     // recovering toward upright, steering to the corridor
-    { p: f(0.86), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.75, y: L.vh * 0.46 }, A: (1 + Acor) / 2, pitch: R * 0.82, yaw: -0.25, bank: 0.2 },
+    { p: f(0.86), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.75, y: L.vh * 0.46 }, A: (1 + Acor) / 2, pitch: mob ? 0.04 : R * 0.82, yaw: mob ? TY * 0.9 : -0.25, bank: mob ? 0.04 : 0.2 },
     // upright, small, beside the grid
-    { p: pT, pref: { x: corr.cx, y: L.vh * 0.45 }, A: Acor, pitch: R, yaw: -0.15, bank: 0.04 },
+    { p: pT, pref: { x: corr.cx, y: L.vh * 0.45 }, A: Acor, pitch: R, yaw: TY - 0.15, bank: 0.04 },
     // gentle S beside the cards
     // straight, calm glide beside the cards (no side-to-side)
-    { p: pC, pref: { x: corr.cx, y: L.vh * 0.52 }, A: Acor, pitch: R + 0.04, yaw: 0.15, bank: 0 },
+    { p: pC, pref: { x: corr.cx, y: L.vh * 0.52 }, A: Acor, pitch: R + 0.04, yaw: TY + 0.15, bank: 0 },
   ];
 
   // landing approach: arc left and down into the story stage
@@ -285,14 +291,16 @@ export function buildPlan(L: Layout) {
   const L1 = docks.land(pL1 * L.s1);
   const L2 = docks.land(pL2 * L.s1);
   K.push(
-    { p: pL1, pref: { x: L1.x + (corr.cx - L1.x) * 0.45, y: L1.y - L.landPx * 0.28 }, A: Acor + (Aland - Acor) * 0.7, pitch: R + 0.12, yaw: -0.4, bank: -0.2 },
-    { p: pL2, pref: { x: L2.x, y: L2.y - L.landPx * 0.12 }, A: Aland, pitch: R + 0.04, yaw: -0.08, bank: -0.03 },
+    { p: pL1, pref: { x: L1.x + (corr.cx - L1.x) * 0.45, y: L1.y - L.landPx * 0.28 }, A: Acor + (Aland - Acor) * 0.7, pitch: R + 0.12, yaw: TY - 0.4, bank: mob ? -0.08 : -0.2 },
+    { p: pL2, pref: { x: L2.x, y: L2.y - L.landPx * 0.12 }, A: Aland, pitch: R + 0.04, yaw: TY - 0.08, bank: -0.03 },
   );
 
   // densify the intent and solve every sample in order, carrying each
   // correction forward so the path bends smoothly around content
   const LT0 = docks.land(pTouch * L.s1);
-  const intentKeys = [{ p: 0, pref: { x: H0.x, y: H0.y }, A: 1, pitch: 0, yaw: 0, bank: 0 }, ...K, { p: pTouch, pref: { x: LT0.x, y: LT0.y }, A: Aland, pitch: R, yaw: 0, bank: 0 }];
+  // phones: the path starts lift-off from where the pedestal really is at that moment
+  const liftStart = pLift > 0 ? [{ p: pLift, pref: { x: H0.x, y: H0.y - pLift * L.s1 }, A: 1, pitch: 0, yaw: 0, bank: 0 }] : [];
+  const intentKeys = [{ p: 0, pref: { x: H0.x, y: H0.y }, A: 1, pitch: 0, yaw: 0, bank: 0 }, ...liftStart, ...K, { p: pTouch, pref: { x: LT0.x, y: LT0.y }, A: Aland, pitch: R, yaw: TY, bank: 0 }];
   const I = {
     x: track(intentKeys.map((k) => ({ p: k.p, v: k.pref.x }))),
     y: track(intentKeys.map((k) => ({ p: k.p, v: k.pref.y }))),
@@ -322,13 +330,15 @@ export function buildPlan(L: Layout) {
   const LT = docks.land(pTouch * L.s1);
   const keys = [
     { p: 0, x: H0.x, y: H0.y, A: 1, pitch: 0, yaw: 0, bank: 0 },
+    ...liftStart.map((k) => ({ p: k.p, x: k.pref.x, y: k.pref.y, A: 1, pitch: 0, yaw: 0, bank: 0 })),
     ...solved,
-    { p: pTouch, x: LT.x, y: LT.y, A: Aland, pitch: R, yaw: 0, bank: 0 },
-    { p: 1, x: LT.x, y: docks.land(L.s1).y, A: Aland, pitch: R, yaw: 0, bank: 0 },
+    { p: pTouch, x: LT.x, y: LT.y, A: Aland, pitch: R, yaw: TY, bank: 0 },
+    { p: 1, x: LT.x, y: docks.land(L.s1).y, A: Aland, pitch: R, yaw: TY, bank: 0 },
   ];
 
   // screen y keys are "as seen at that key's own scroll"; near the docks the
   // cup is glued to the real surface instead (see evaluate)
+  const L1i = liftStart.length + 1; // index of the first mid-air key
   const build = () => ({
     x: track(keys.map((k) => ({ p: k.p, v: k.x }))),
     y: track(keys.map((k) => ({ p: k.p, v: k.y }))),
@@ -362,11 +372,11 @@ export function buildPlan(L: Layout) {
     T = build();
   }
 
-  const heroGlue = (p: number) => 1 - smooth(0, keys[1].p * 0.7, p);
+  const heroGlue = (p: number) => 1 - smooth(pLift, pLift + (keys[L1i].p - pLift) * 0.7, p);
   const landGlue = (p: number) => smooth(pL2, pTouch, p);
 
-  /** the pose at progress p when the page is actually scrolled to `scroll` */
-  function evaluate(p: number, scroll: number, out: Pose): Pose {
+  /** where the cup's centre is on screen at progress p when the page is at `scroll` */
+  function screenPos(p: number, scroll: number) {
     // near a dock the cup blends onto that surface's REAL position on the page
     // (pedestal / disc move with the actual scroll, not the smoothed progress)
     const hg = heroGlue(p);
@@ -377,6 +387,13 @@ export function buildPlan(L: Layout) {
       sx += (H0.x - sx) * hg;
       sy += (H0.y - scroll - sy) * hg;
     }
+    // on the approach, fly relative to where the disc REALLY is (fast scrolling
+    // moves it ahead of the smoothed progress), so the cup can't sink into it
+    const aw = smooth(pC, pL1, p);
+    if (aw > 0 && p < pTouch) {
+      const shift = docks.land(scroll).y - docks.land(p * L.s1).y;
+      sy += shift * aw;
+    }
     if (p >= pTouch) {
       const d = docks.land(scroll);
       sx = d.x;
@@ -386,14 +403,21 @@ export function buildPlan(L: Layout) {
       sx += (d.x - sx) * lg;
       sy += (d.y - sy) * lg;
     }
+    return { sx, sy };
+  }
+
+  /** the pose at progress p when the page is actually scrolled to `scroll` */
+  function evaluate(p: number, scroll: number, out: Pose): Pose {
+    const { sx, sy } = screenPos(p, scroll);
     const A = T.A(p);
     screenToWorld(cam, L.vw, L.vh, sx, sy, depthFor(A), out.center);
     orient(T.pitch(p), T.yaw(p), T.bank(p), out.quat);
     // one tiny damped rock after touchdown, about the base
     const u = clamp01((p - pTouch) / (1 - pTouch));
     out.rock = p > pTouch ? 0.045 * Math.sin(u * Math.PI * 2) * Math.pow(1 - u, 1.4) : 0;
-    out.float = smooth(keys[1].p * 0.6, keys[2].p, p) * (1 - smooth(pL1, pL2, p));
+    out.float = smooth(keys[L1i].p * 0.6, keys[L1i + 1].p, p) * (1 - smooth(pL1, pL2, p));
     out.heroW = 1 - smooth(0, 0.03, p);
+    out.float *= 1 - heroGlue(p);
     out.landW = smooth(0.985, 1, p);
     out.dock = p < 0.002 ? 'hero' : p > 0.998 ? 'land' : null;
     return out;
@@ -402,13 +426,12 @@ export function buildPlan(L: Layout) {
   /** test/debug: projected bounds and collisions at p (page at the planned scroll) */
   function sample(p: number, pad = L.clear * 0.6) {
     const s = p * L.s1;
-    const x = T.x(p);
-    const y = T.y(p);
+    const { sx: x, sy: y } = screenPos(p, s);
     const b = bbox(x, y, T.A(p), T.pitch(p), T.yaw(p), T.bank(p));
-    const floatPad = 6 * (smooth(keys[1].p * 0.6, keys[2].p, p) * (1 - smooth(pL1, pL2, p)));
+    const floatPad = 6 * (smooth(keys[L1i].p * 0.6, keys[L1i + 1].p, p) * (1 - smooth(pL1, pL2, p)));
     const bb = { x0: b.x0 - floatPad, y0: b.y0 - floatPad, x1: b.x1 + floatPad, y1: b.y1 + floatPad };
     // resting on / rising off the pedestal: glued to the page, may sit below the fold
-    const lifting = p < keys[1].p;
+    const lifting = p < keys[L1i].p;
     // after lift-off the pedestal only matters if the cup is at its depth or behind it
     const h = hits(bb, s, pad, 0, 0, { pedestal: !lifting && T.A(p) < 1 && p < pT, bottom: !lifting });
     return { p, s, bbox: bb, hits: h, center: { x, y }, A: T.A(p) };
