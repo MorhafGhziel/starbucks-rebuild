@@ -125,14 +125,26 @@ export function Sleeve() {
     }),
     [],
   );
+  // slides up around the cup in place (grows from its base while fading in),
+  // so it never passes through the landing disc
+  const amt = useRef(0);
   useFrame((_, dt) => {
     if (!g.current) return;
     const on = cupStore.sleeveOn && cupStore.flight > LANDED;
-    g.current.position.y = damp(g.current.position.y, on ? SLEEVE.lift : -4.2, on ? 4.2 : 3.2, dt);
-    g.current.visible = g.current.position.y > -4.1;
+    amt.current = damp(amt.current, on ? 1 : 0, 6, dt);
+    const a = amt.current;
+    g.current.visible = a > 0.005;
+    g.current.scale.set(0.97 + 0.03 * a, 0.35 + 0.65 * a, 0.97 + 0.03 * a);
+    g.current.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.Material | undefined;
+      if (m) {
+        m.transparent = a < 0.999;
+        m.opacity = a;
+      }
+    });
   });
   return (
-    <group ref={g} position={[0, -4.2, 0]}>
+    <group ref={g} position={[0, SLEEVE.lift, 0]} visible={false}>
       <mesh geometry={geo.wall} castShadow>
         <meshPhysicalMaterial
           key={tex ? 'printed' : 'blank'}

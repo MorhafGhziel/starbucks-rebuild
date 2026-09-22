@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { SIREN_PATHS } from '@/components/brand/siren-paths';
 
 export const CUP = { h: 2.74, rTop: 0.9, rBot: 0.62 };
-export const SLEEVE = { h: 2.5, rTop: 0.93, rBot: 0.66, lift: -0.06 };
+export const SLEEVE = { h: 2.5, rTop: 0.93, rBot: 0.66, lift: 0.002 };
 
 export const COLOR = {
   green: '#00754A',
