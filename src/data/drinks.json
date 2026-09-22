@@ -1,0 +1,321 @@
+{
+  "source": "https://www.starbucks.com/menu",
+  "fetched": "2026-09-22",
+  "drinks": [
+    {
+      "id": "418-hot",
+      "group": "fall",
+      "name": "Pumpkin Spice Latte",
+      "form": "Hot",
+      "description": "Our signature Espresso Roast and steamed milk with the celebrated flavor combination of pumpkin, cinnamon, nutmeg and clove. Enjoy it topped with whipped cream and real pumpkin-pie spices.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 390,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "150 mg",
+      "protein": "14 g",
+      "url": "https://www.starbucks.com/menu/product/418/hot",
+      "image": "/drinks/PumpkinSpiceLatteV1"
+    },
+    {
+      "id": "2123113-iced",
+      "group": "fall",
+      "name": "Pumpkin Cream Cold Brew",
+      "form": "Iced",
+      "description": "Starbucks® Cold Brew sweetened with vanilla syrup and topped with pumpkin cream cold foam and a dusting of pumpkin-spice topping.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti",
+        "Trenta"
+      ],
+      "calories": 250,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "185 mg",
+      "protein": "3 g",
+      "url": "https://www.starbucks.com/menu/product/2123113/iced",
+      "image": "/drinks/PumpkinCreamColdBrew"
+    },
+    {
+      "id": "40876-hot",
+      "group": "fall",
+      "name": "Pecan Crunch Latte",
+      "form": "Hot",
+      "description": "Made with Starbucks® Blonde Espresso Roast and 2% milk. Nutty flavors of pecan, rich brown-buttery notes and holiday baking spices come together for a smooth and delicious treat, topped with a crunchy pecan-flavored sugar.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 260,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "170 mg",
+      "protein": "11 g",
+      "url": "https://www.starbucks.com/menu/product/40876/hot",
+      "image": "/drinks/PecanCrunchOatmilkLatte"
+    },
+    {
+      "id": "2123774-iced",
+      "group": "fall",
+      "name": "Iced Pumpkin Cream Chai",
+      "form": "Iced",
+      "description": "A rich and creamy Iced Chai––our blend of black tea infused with cinnamon, other warming spices and milk, topped with a sweet pumpkin cream cold foam and a dusting of pumpkin spice topping.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 400,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "60 mg",
+      "protein": "9 g",
+      "url": "https://www.starbucks.com/menu/product/2123774/iced",
+      "image": "/drinks/IcedPumpkinCreamChaiTeaLatte"
+    },
+    {
+      "id": "407-hot",
+      "group": "hot",
+      "name": "Caffè Latte",
+      "form": "Hot",
+      "description": "Our dark, rich espresso balanced with steamed milk and a light layer of foam. A perfect milk-forward warm-up.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 190,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "150 mg",
+      "protein": "13 g",
+      "url": "https://www.starbucks.com/menu/product/407/hot",
+      "image": "/drinks/CaffeLatte"
+    },
+    {
+      "id": "409-hot",
+      "group": "hot",
+      "name": "Cappuccino",
+      "form": "Hot",
+      "description": "Dark, rich espresso lies in wait under a smoothed and stretched layer of thick milk foam. An alchemy of barista artistry and craft.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 140,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "150 mg",
+      "protein": "9 g",
+      "url": "https://www.starbucks.com/menu/product/409/hot",
+      "image": "/drinks/SBX20190617_Cappuccino"
+    },
+    {
+      "id": "413-hot",
+      "group": "hot",
+      "name": "Caramel Macchiato",
+      "form": "Hot",
+      "description": "Freshly steamed milk with vanilla-flavored syrup marked with espresso and topped with a caramel drizzle for an oh-so-sweet finish.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 250,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "150 mg",
+      "protein": "10 g",
+      "url": "https://www.starbucks.com/menu/product/413/hot",
+      "image": "/drinks/SBX20211029_CaramelMacchiato"
+    },
+    {
+      "id": "565-hot",
+      "group": "hot",
+      "name": "Flat White",
+      "form": "Hot",
+      "description": "Smooth ristretto shots of espresso get the perfect amount of steamed whole milk to create a not-too-strong, not-too-creamy, just-right flavor.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 220,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "195 mg",
+      "protein": "12 g",
+      "url": "https://www.starbucks.com/menu/product/565/hot",
+      "image": "/drinks/SBX20230406_FlatWhite"
+    },
+    {
+      "id": "2121255-iced",
+      "group": "iced",
+      "name": "Cold Brew",
+      "form": "Iced",
+      "description": "Handcrafted in small batches daily, slow-steeped in cool water for 20 hours, without touching heat—Starbucks® Cold Brew is made from our custom blend of beans grown to steep long and cold for a super-smooth flavor.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti",
+        "Trenta"
+      ],
+      "calories": 5,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "205 mg",
+      "protein": "0 g",
+      "url": "https://www.starbucks.com/menu/product/2121255/iced",
+      "image": "/drinks/ColdBrew"
+    },
+    {
+      "id": "2123431-iced",
+      "group": "iced",
+      "name": "Iced Brown Sugar Oatmilk Shaken Espresso",
+      "form": "Iced",
+      "description": "First we shake Starbucks® Blonde espresso, brown sugar and cinnamon together, and then top it off with oatmilk and ice for a cool lift to power you through your day.\n\nIf Starbucks® Blonde Espresso Roast is not available, Signature Espresso Roast will be substituted.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 150,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "255 mg",
+      "protein": "2 g",
+      "url": "https://www.starbucks.com/menu/product/2123431/iced",
+      "image": "/drinks/IcedBrownSugarOatmilkShakenEspresso"
+    },
+    {
+      "id": "2121859-iced",
+      "group": "iced",
+      "name": "Vanilla Sweet Cream Cold Brew",
+      "form": "Iced",
+      "description": "Our slow-steeped custom blend of Starbucks® Cold Brew coffee accented with vanilla and topped with a delicate float of house-made vanilla sweet cream that cascades throughout the cup. It's over-the-top and super-smooth.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti",
+        "Trenta"
+      ],
+      "calories": 110,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "185 mg",
+      "protein": "1 g",
+      "url": "https://www.starbucks.com/menu/product/2121859/iced",
+      "image": "/drinks/SBX20190607_VanillaSweetCreamColdBrew"
+    },
+    {
+      "id": "413-iced",
+      "group": "iced",
+      "name": "Iced Caramel Macchiato",
+      "form": "Iced",
+      "description": "We combine our rich, full-bodied espresso with vanilla-flavored syrup, milk and ice, then top it off with a caramel drizzle for an oh-so-sweet finish.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 250,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "150 mg",
+      "protein": "10 g",
+      "url": "https://www.starbucks.com/menu/product/413/iced",
+      "image": "/drinks/IcedCaramelMacchiato"
+    },
+    {
+      "id": "468-hot",
+      "group": "tea",
+      "name": "Matcha Latte",
+      "form": "Hot",
+      "description": "Smooth and creamy, this vibrant green tea latte is handcrafted with our matcha, milk and classic syrup. A perfect anytime boost with sweetness that can be customized to your taste!",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 220,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "65 mg",
+      "protein": "11 g",
+      "url": "https://www.starbucks.com/menu/product/468/hot",
+      "image": "/drinks/SBX20211115_MatchaTeaLatte"
+    },
+    {
+      "id": "468-iced",
+      "group": "tea",
+      "name": "Iced Matcha Latte",
+      "form": "Iced",
+      "description": "Smooth and creamy, this vibrant green tea latte is handcrafted with our matcha, milk and classic syrup, served with ice. A perfect anytime boost with sweetness that can be customized to your taste, and goes with any quarter zip.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 190,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "65 mg",
+      "protein": "9 g",
+      "url": "https://www.starbucks.com/menu/product/468/iced",
+      "image": "/drinks/IcedMatchaTeaLatte"
+    },
+    {
+      "id": "466-hot",
+      "group": "tea",
+      "name": "Chai Latte",
+      "form": "Hot",
+      "description": "Our premium chai—black tea infused with cinnamon, clove and other warming spices—combined with steamed milk and topped with foam. Keep it classic or customize the flavor and sweetness for a Chai Latte that’s uniquely yours.",
+      "sizes": [
+        "Short",
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 200,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "55 mg",
+      "protein": "7 g",
+      "url": "https://www.starbucks.com/menu/product/466/hot",
+      "image": "/drinks/SBX20190624_ChaiLatte"
+    },
+    {
+      "id": "466-iced",
+      "group": "tea",
+      "name": "Iced Chai Latte",
+      "form": "Iced",
+      "description": "Our premium chai—black tea infused with cinnamon, clove and other warming spices—combined with milk and served over ice. Keep it classic or customize the flavor and sweetness for an Iced Chai Latte that’s uniquely yours.",
+      "sizes": [
+        "Tall",
+        "Grande",
+        "Venti"
+      ],
+      "calories": 190,
+      "caloriesSize": "Grande",
+      "servingSize": "16 fl oz",
+      "caffeine": "60 mg",
+      "protein": "6 g",
+      "url": "https://www.starbucks.com/menu/product/466/iced",
+      "image": "/drinks/IcedChaiTeaLatte"
+    }
+  ]
+}
