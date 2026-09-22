@@ -50,6 +50,8 @@
 @media (max-width: 900px) {
   .brand__grid { grid-template-columns: 1fr; }
   .brand__copy, .brand__stage { grid-column: 1; grid-row: auto; }
+  /* the flying cup lands first, the story follows, so its path never crosses text */
+  .brand__stage { order: -1; }
   .brand__cup { height: 60svh; min-height: 380px; }
   .brand__sep { display: none; }
 }

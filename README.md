@@ -14,7 +14,7 @@ npm run build && npm start   # production build on the same port
 
 | Route | What |
 |---|---|
-| `/` | Hero with a real-time 3D Starbucks cup you can drag · menu tabs · the cup up close (lift the lid, add the Insulated Sleeve) · take-it-home rail · farm-to-cup steps · baristas + store locator · bring your own cup · questions · stories |
+| `/` | One real-time 3D Starbucks cup that lifts off the hero plinth as you scroll, rides the right edge over the menu and lands in “One store” (drag it at either end; lift the lid, add the Insulated Sleeve) · menu tabs · take-it-home rail · farm-to-cup steps · baristas + store locator · bring your own cup · questions · stories |
 | `/menu` | 16 drinks with search, filters, empty and reset states, and a details drawer |
 | `/shop` | 22 products (whole bean, drinkware, brewing) with search and filters |
 | `/credits` | Every source |
@@ -34,7 +34,8 @@ npm run build && npm start   # production build on the same port
 ## Pipelines (`tools/`)
 - `products.mjs`, `drinks.mjs`: rebuild `src/data/*.json` from the official feeds.
 - `realcolor.mjs`: real-colour images; only flat studio backgrounds are shifted onto the site green/cream so tiles stay seamless. (`duotone.mjs` / `photos.mjs` make the earlier green-and-cream versions.)
-- `posters.mjs`: renders the transparent poster images the 3D stages fall back to.
+- `posters.mjs`: rendered the transparent poster images the cup anchors show before WebGL is ready or when it isn't available (written for the earlier per-section canvases; the posters still match the resting states).
+- `flight.mjs`: captures the cup's trip from hero to “One store” as a scroll sequence.
 - `interact.mjs`: 56 interaction, layout and fallback checks against a running server.
 - `shot.mjs`, `sections.mjs`, `states.mjs`: screenshots for review.
 

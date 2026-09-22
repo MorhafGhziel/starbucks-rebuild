@@ -269,9 +269,14 @@ p { text-wrap: pretty; }
 .cup-stage { position: relative; outline-offset: -6px; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
 .cup-stage:active { cursor: grabbing; }
 .cup-stage__poster { object-fit: contain; transition: opacity 600ms var(--ease); }
-.cup-stage[data-ready='true'] .cup-stage__poster { opacity: 0; }
-.cup-stage .cup-canvas { position: absolute !important; inset: 0; opacity: 0; transition: opacity 700ms var(--ease); }
-.cup-stage[data-ready='true'] .cup-canvas { opacity: 1; }
+html[data-cup='live'] .cup-stage__poster { opacity: 0; }
+
+/* the one travelling cup: a fixed layer above the page, below the header;
+   it never takes clicks, so the anchors and cards underneath still work */
+.cup-flight-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 700ms var(--ease); }
+html[data-cup='live'] .cup-flight-layer { opacity: 1; }
+.cup-flight-layer[data-active='false'] { visibility: hidden; }
+.cup-flight-layer, .cup-flight-layer * { pointer-events: none !important; }
 
 /* the rotating ring badge (the Siren's outer ring, set in type) */
 .ring { position: absolute; width: clamp(104px, 10vw, 136px); aspect-ratio: 1; pointer-events: none; }

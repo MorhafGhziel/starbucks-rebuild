@@ -1,39 +1,28 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CupStage } from '@/components/three/CupStage';
+import { useEffect, useState } from 'react';
+import { CupAnchor } from '@/components/three/CupAnchor';
+import { cupStore } from '@/components/three/cupStore';
 import { Icon } from '@/components/ui/Icon';
 import { Wave } from '@/components/ui/Wave';
 import { useBag } from '@/components/bag/BagProvider';
 import { LINKS, goods } from '@/data/content';
 
-gsap.registerPlugin(ScrollTrigger);
 const sleeve = goods.find((g) => g.id === 'starbucks-stainless-steel-insulated-sleeve')!;
 
 export function BrandMoment() {
-  const root = useRef<HTMLElement>(null);
   const [lid, setLid] = useState(false);
   const [sleeveOn, setSleeveOn] = useState(false);
-  const [nudge, setNudge] = useState({ n: 0, dir: 1 });
-  const [reset, setReset] = useState(0);
-  const bag = useBag();
-
-  // the cup rises into the section as you arrive (echoes the hero)
+  // the travelling cup reads these every frame
   useEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        el.querySelector('.brand__stage'),
-        { yPercent: 18, scale: 0.92 },
-        { yPercent: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 20%', scrub: 0.6 } },
-      );
-    });
-    return () => mm.revert();
-  }, []);
+    cupStore.lidOpen = lid;
+    cupStore.sleeveOn = sleeveOn;
+  }, [lid, sleeveOn]);
+  const turnBy = (dir: number) => {
+    cupStore.touched = true;
+    cupStore.yaw += (Math.PI / 4) * dir;
+  };
+  const bag = useBag();
 
   const caption = sleeveOn
     ? 'The Starbucks® Stainless Steel Insulated Sleeve. Slide in a 16 oz hot cup to keep it hotter, longer.'
@@ -42,7 +31,7 @@ export function BrandMoment() {
       : 'A grande hot cup: 16 fl oz, with the Siren on the front.';
 
   return (
-    <section ref={root} className="brand" data-ground="green" aria-labelledby="brand-title">
+    <section className="brand" data-ground="green" aria-labelledby="brand-title">
       <div className="shell brand__grid">
         <div className="brand__copy">
           <h2 id="brand-title" className="h2 brand__title">
@@ -61,29 +50,25 @@ export function BrandMoment() {
         </div>
 
         <div className="brand__stage">
-          <CupStage
-            mode="inspect"
+          <CupAnchor
+            name="brand"
             poster="/renders/cup-inspect.png"
             posterAlt="A Starbucks hot cup with its lid and the green Siren logo."
-            lidOpen={lid}
-            sleeveOn={sleeveOn}
-            nudge={nudge}
-            resetKey={reset}
             label="The Starbucks hot cup, up close"
             className="brand__cup"
           />
           <div className="brand__controls" role="group" aria-label="Cup controls">
-            <button type="button" className="icon-btn icon-btn--ring" onClick={() => setNudge((v) => ({ n: v.n + 1, dir: -1 }))} aria-label="Turn left">
+            <button type="button" className="icon-btn icon-btn--ring" onClick={() => turnBy(-1)} aria-label="Turn left">
               <Icon name="rotateL" />
             </button>
-            <button type="button" className="icon-btn icon-btn--ring" onClick={() => setNudge((v) => ({ n: v.n + 1, dir: 1 }))} aria-label="Turn right">
+            <button type="button" className="icon-btn icon-btn--ring" onClick={() => turnBy(1)} aria-label="Turn right">
               <Icon name="rotateR" />
             </button>
             <button
               type="button"
               className="icon-btn icon-btn--ring"
               onClick={() => {
-                setReset((r) => r + 1);
+                cupStore.yaw = Math.round(cupStore.yaw / (Math.PI * 2)) * Math.PI * 2;
                 setLid(false);
                 setSleeveOn(false);
               }}

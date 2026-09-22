@@ -1,7 +1,8 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import { ContactShadows, Environment, Lightformer } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { Environment, Lightformer } from '@react-three/drei';
+import { LANDED, cupStore } from './cupStore';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
@@ -16,23 +17,6 @@ import {
   rimGeometry,
   wallGeometry,
 } from './cupParts';
-
-export type CupControl = {
-  /** target yaw in radians; the scene eases toward it */
-  yaw: number;
-  /** true once the visitor has touched the cup (stops the idle sway) */
-  touched: boolean;
-};
-
-export type CupSceneProps = {
-  mode: 'hero' | 'inspect';
-  control: React.RefObject<CupControl>;
-  lidOpen?: boolean;
-  sleeveOn?: boolean;
-  active: boolean;
-  reduced: boolean;
-  onReady?: () => void;
-};
 
 const damp = THREE.MathUtils.damp;
 
@@ -58,7 +42,7 @@ function useWallTexture(kind: 'cup' | 'sleeve') {
   return tex;
 }
 
-function Cup({ lidOpen }: { lidOpen: boolean }) {
+export function Cup() {
   const wallTex = useWallTexture('cup');
   const lid = useRef<THREE.Group>(null);
   const geo = useMemo(
@@ -77,6 +61,7 @@ function Cup({ lidOpen }: { lidOpen: boolean }) {
   useFrame((_, dt) => {
     if (!lid.current) return;
     const g = lid.current;
+    const lidOpen = cupStore.lidOpen && cupStore.flight > LANDED;
     g.position.y = damp(g.position.y, lidOpen ? CUP.h + 0.7 : CUP.h, 5, dt);
     g.rotation.x = damp(g.rotation.x, lidOpen ? -0.32 : 0, 5, dt);
     g.position.z = damp(g.position.z, lidOpen ? -0.55 : 0, 5, dt);
@@ -128,7 +113,7 @@ function Cup({ lidOpen }: { lidOpen: boolean }) {
   );
 }
 
-function Sleeve({ on }: { on: boolean }) {
+export function Sleeve() {
   const tex = useWallTexture('sleeve');
   const g = useRef<THREE.Group>(null);
   const geo = useMemo(
@@ -142,6 +127,7 @@ function Sleeve({ on }: { on: boolean }) {
   );
   useFrame((_, dt) => {
     if (!g.current) return;
+    const on = cupStore.sleeveOn && cupStore.flight > LANDED;
     g.current.position.y = damp(g.current.position.y, on ? SLEEVE.lift : -4.2, on ? 4.2 : 3.2, dt);
     g.current.visible = g.current.position.y > -4.1;
   });
@@ -183,7 +169,7 @@ const BEANS: [number, number, number, number][] = [
   [1.2, 0.35, 1.25, 2.4],
 ];
 
-function Beans({ reduced }: { reduced: boolean }) {
+export function Beans({ reduced, hideLeft = false }: { reduced: boolean; hideLeft?: boolean }) {
   const geo = useMemo(() => beanGeometry(), []);
   const refs = useRef<(THREE.Mesh | null)[]>([]);
   useFrame(({ clock }) => {
@@ -199,6 +185,7 @@ function Beans({ reduced }: { reduced: boolean }) {
     <>
       {BEANS.map((b, i) => (
         <mesh
+          visible={!(hideLeft && b[0] < 0)}
           key={i}
           ref={(m) => {
             refs.current[i] = m;
@@ -215,7 +202,7 @@ function Beans({ reduced }: { reduced: boolean }) {
   );
 }
 
-function Plinth() {
+export function Plinth() {
   const geo = useMemo(() => {
     const r = 1.28;
     const b = 0.08;
@@ -238,87 +225,19 @@ function Plinth() {
   );
 }
 
-function Rig({ mode, control, reduced, lidOpen, sleeveOn, onReady }: Omit<CupSceneProps, 'active'>) {
-  const turn = useRef<THREE.Group>(null);
-  const lift = useRef<THREE.Group>(null);
-  const born = useRef<number | null>(null);
-  const readied = useRef(false);
-
-  useFrame(({ clock }, dt) => {
-    if (!turn.current || !lift.current) return;
-    if (born.current === null) born.current = clock.elapsedTime;
-    const age = clock.elapsedTime - born.current;
-    if (!readied.current && age > 0.05) {
-      readied.current = true;
-      onReady?.();
-    }
-    // entrance: rise and unwind (skipped with reduced motion)
-    const k = reduced ? 1 : Math.min(1, age / 1.25);
-    const e = 1 - Math.pow(1 - k, 4);
-    lift.current.position.y = (1 - e) * -1.2;
-    const c = control.current!;
-    let target = c.yaw;
-    if (!c.touched && !reduced && mode === 'hero') target += Math.sin(clock.elapsedTime * 0.45) * 0.38;
-    const intro = (1 - e) * -2.4;
-    turn.current.rotation.y = damp(turn.current.rotation.y, target + intro, 5.5, dt);
-  });
-
+export function Studio() {
   return (
-    <group ref={lift}>
-      <group ref={turn}>
-        <Cup lidOpen={!!lidOpen} />
-        {mode === 'inspect' && <Sleeve on={!!sleeveOn} />}
-      </group>
-      {mode === 'hero' && <Beans reduced={reduced} />}
-    </group>
-  );
-}
-
-export default function CupScene(props: CupSceneProps) {
-  const { mode, active } = props;
-  const hero = mode === 'hero';
-  return (
-    <Canvas
-      className="cup-canvas"
-      frameloop={active ? 'always' : 'never'}
-      dpr={[1, 1.75]}
-      shadows
-      camera={hero ? { fov: 25, position: [0, 3.9, 11.4] } : { fov: 24, position: [0, 5.2, 11] }}
-      gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'high-performance' }}
-      onCreated={({ camera }) => camera.lookAt(0, hero ? 1.45 : 1.55, 0)}
-    >
+    <>
       <ambientLight intensity={0.45} color={COLOR.cream} />
-      <directionalLight
-        position={[-4, 7, 5]}
-        intensity={2.1}
-        color={COLOR.cream}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0004}
-        shadow-camera-left={-4}
-        shadow-camera-right={4}
-        shadow-camera-top={6}
-        shadow-camera-bottom={-2}
-      />
+      <directionalLight position={[-4, 7, 9]} intensity={2.1} color={COLOR.cream} />
       <Environment resolution={256} frames={1}>
         {/* studio: a big soft key, a strip rim, and green bounce from the room */}
-        <Lightformer form="rect" intensity={3.6} color={COLOR.cream} position={[-5, 4, 6]} scale={[6, 8, 1]} target={[0, 1.5, 0]} />
-        <Lightformer form="rect" intensity={3.2} color={COLOR.cream} position={[5.5, 3, -2]} scale={[1.2, 9, 1]} target={[0, 1.5, 0]} />
-        <Lightformer form="rect" intensity={0.35} color={COLOR.green} position={[0, -3, 3]} scale={[12, 4, 1]} target={[0, 1, 0]} />
-        <Lightformer form="rect" intensity={0.55} color={COLOR.green} position={[0, 5, -8]} scale={[16, 10, 1]} target={[0, 1, 0]} />
-        <Lightformer form="ring" intensity={1.4} color={COLOR.cream} position={[2, 7, 4]} scale={2.5} target={[0, 1, 0]} />
+        <Lightformer form="rect" intensity={3.6} color={COLOR.cream} position={[-5, 4, 6]} scale={[6, 8, 1]} target={[0, 0, 0]} />
+        <Lightformer form="rect" intensity={3.2} color={COLOR.cream} position={[5.5, 3, -2]} scale={[1.2, 9, 1]} target={[0, 0, 0]} />
+        <Lightformer form="rect" intensity={0.35} color={COLOR.green} position={[0, -3, 3]} scale={[12, 4, 1]} target={[0, 0, 0]} />
+        <Lightformer form="rect" intensity={0.55} color={COLOR.green} position={[0, 5, -8]} scale={[16, 10, 1]} target={[0, 0, 0]} />
+        <Lightformer form="ring" intensity={1.4} color={COLOR.cream} position={[2, 7, 4]} scale={2.5} target={[0, 0, 0]} />
       </Environment>
-
-      <Rig {...props} />
-
-      {hero ? (
-        <>
-          <Plinth />
-          <ContactShadows position={[0, 0.002, 0]} opacity={0.5} scale={2.8} blur={2.2} far={2.6} resolution={512} color={COLOR.deep} />
-        </>
-      ) : (
-        <ContactShadows position={[0, -0.07, 0]} opacity={0.42} scale={5} blur={2.6} far={3} resolution={512} color={COLOR.deep} />
-      )}
-    </Canvas>
+    </>
   );
 }

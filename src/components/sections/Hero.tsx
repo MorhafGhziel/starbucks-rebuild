@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { CupStage } from '@/components/three/CupStage';
+import { CupAnchor } from '@/components/three/CupAnchor';
 import { Wave } from '@/components/ui/Wave';
 import { Ring } from '@/components/ui/Ring';
 import { LINKS } from '@/data/content';
@@ -46,8 +46,8 @@ export function Hero() {
         </div>
 
         <div className="hero__stage">
-          <CupStage
-            mode="hero"
+          <CupAnchor
+            name="hero"
             poster="/renders/cup-hero.png"
             posterAlt="A Starbucks hot cup with the green Siren logo, standing on a cream plinth among coffee beans."
             label="A Starbucks hot cup you can turn"

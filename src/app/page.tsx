@@ -9,6 +9,7 @@ import { Cafe } from '@/components/sections/Cafe';
 import { Reuse } from '@/components/sections/Reuse';
 import { Faq } from '@/components/sections/Faq';
 import { Journal } from '@/components/sections/Journal';
+import { CupFlight } from '@/components/three/CupFlight';
 
 export default function Home() {
   return (
@@ -26,6 +27,7 @@ export default function Home() {
         <Journal />
       </main>
       <Footer />
+      <CupFlight />
     </>
   );
 }
