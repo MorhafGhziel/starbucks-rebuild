@@ -68,7 +68,7 @@ function Cup({ lidOpen }: { lidOpen: boolean }) {
       base: baseGeometry(),
       rim: rimGeometry(),
       lid: lidGeometry(),
-      coffee: new THREE.CircleGeometry(CUP.rTop - 0.07, 96),
+      coffee: new THREE.CircleGeometry(CUP.rTop - 0.035, 96),
       sip: new THREE.CapsuleGeometry(0.045, 0.2, 6, 16),
     }),
     [],
@@ -77,9 +77,9 @@ function Cup({ lidOpen }: { lidOpen: boolean }) {
   useFrame((_, dt) => {
     if (!lid.current) return;
     const g = lid.current;
-    g.position.y = damp(g.position.y, lidOpen ? CUP.h + 1.05 : CUP.h, 5, dt);
+    g.position.y = damp(g.position.y, lidOpen ? CUP.h + 0.7 : CUP.h, 5, dt);
     g.rotation.x = damp(g.rotation.x, lidOpen ? -0.32 : 0, 5, dt);
-    g.position.z = damp(g.position.z, lidOpen ? -0.25 : 0, 5, dt);
+    g.position.z = damp(g.position.z, lidOpen ? -0.55 : 0, 5, dt);
   });
 
   return (
@@ -105,7 +105,7 @@ function Cup({ lidOpen }: { lidOpen: boolean }) {
         <meshPhysicalMaterial color={COLOR.cream} roughness={0.5} />
       </mesh>
       {/* the coffee, seen when the lid lifts: deep green, glossy */}
-      <mesh geometry={geo.coffee} position={[0, CUP.h - 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh geometry={geo.coffee} position={[0, CUP.h - 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <meshPhysicalMaterial color={COLOR.deep} roughness={0.18} clearcoat={1} clearcoatRoughness={0.1} />
       </mesh>
 
@@ -152,20 +152,22 @@ function Sleeve({ on }: { on: boolean }) {
           key={tex ? 'printed' : 'blank'}
           map={tex ?? undefined}
           color={tex ? '#ffffff' : COLOR.steel}
-          metalness={1}
-          roughness={0.3}
+          metalness={0.55}
+          roughness={0.32}
+          clearcoat={0.35}
+          clearcoatRoughness={0.25}
           anisotropy={0.7}
           anisotropyRotation={Math.PI / 2}
         />
       </mesh>
       <mesh geometry={geo.inner}>
-        <meshStandardMaterial color={COLOR.steel} metalness={1} roughness={0.35} side={THREE.BackSide} />
+        <meshStandardMaterial color={COLOR.steel} metalness={0.5} roughness={0.4} side={THREE.BackSide} />
       </mesh>
       <mesh geometry={geo.lip} position={[0, SLEEVE.h, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial color={COLOR.steel} metalness={1} roughness={0.22} />
+        <meshStandardMaterial color={COLOR.steel} metalness={0.6} roughness={0.22} />
       </mesh>
       <mesh geometry={geo.base} rotation={[Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial color={COLOR.steel} metalness={1} roughness={0.35} />
+        <meshStandardMaterial color={COLOR.steel} metalness={0.5} roughness={0.35} />
       </mesh>
     </group>
   );
@@ -281,9 +283,9 @@ export default function CupScene(props: CupSceneProps) {
       frameloop={active ? 'always' : 'never'}
       dpr={[1, 1.75]}
       shadows
-      camera={hero ? { fov: 25, position: [0, 3.9, 11.4] } : { fov: 24, position: [0, 3.6, 11.5] }}
+      camera={hero ? { fov: 25, position: [0, 3.9, 11.4] } : { fov: 24, position: [0, 5.2, 11] }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'high-performance' }}
-      onCreated={({ camera }) => camera.lookAt(0, hero ? 1.45 : 1.4, 0)}
+      onCreated={({ camera }) => camera.lookAt(0, hero ? 1.45 : 1.55, 0)}
     >
       <ambientLight intensity={0.45} color={COLOR.cream} />
       <directionalLight
