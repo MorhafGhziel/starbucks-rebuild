@@ -7,10 +7,10 @@ const b = await chromium.launch({
   args: ['--headless=new', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'],
 });
 const pg = await b.newPage({ viewport: { width: +w, height: +h } });
-await pg.goto('http://localhost:3970/?flight-debug', { waitUntil: 'networkidle' });
-await pg.waitForFunction(() => window.__flight?.plan);
+await pg.goto('http://localhost:3970/' + (process.env.NODBG ? '' : '?flight-debug'), { waitUntil: 'networkidle' });
+await pg.waitForTimeout(500);
 await pg.waitForTimeout(1500);
-const s1 = await pg.evaluate(() => window.__flight.plan.L.s1);
+const s1 = await pg.evaluate(() => { const e = document.querySelector('[data-cup-anchor="brand"]').getBoundingClientRect(); return e.top + scrollY + e.height / 2 - innerHeight / 2; });
 let i = 0;
 for (const p of list.split(',').map(Number)) {
   await pg.evaluate((y) => window.scrollTo(0, y), p * s1);

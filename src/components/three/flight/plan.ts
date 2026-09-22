@@ -10,6 +10,8 @@ import { CUP } from '../cupParts';
 export const FOV = 25;
 /** the scrubbed cup may trail the scrolled page by at most this many px */
 export const LAG_PX = 110;
+/** the lag allowance scales with the screen so small phones keep their free space */
+export const lagFor = (vh: number) => Math.min(LAG_PX, Math.round(vh * 0.08));
 export const CAM_POS = new THREE.Vector3(0, 2.4, 12);
 export const D0 = CAM_POS.length(); // view depth of the hero cup
 const TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
@@ -157,7 +159,7 @@ export function buildPlan(L: Layout) {
   const k = scaleFor(L.heroPx, D0, L.vh); // one rigid world size for the whole trip
   const Aland = L.landPx / L.heroPx;
   const dLand = D0 / Aland;
-  const lag = LAG_PX; // max px the cup may trail the page
+  const lag = lagFor(L.vh); // max px the cup may trail the page
 
   const pTouch = 0.965; // base meets the disc; the rest is the settle
   const corr = { x0: L.corridor.x0, x1: L.corridor.x1, cx: (L.corridor.x0 + L.corridor.x1) / 2, w: L.corridor.x1 - L.corridor.x0 };
@@ -360,16 +362,30 @@ export function buildPlan(L: Layout) {
     T = build();
   }
 
-  const heroGlue = (p: number) => 1 - smooth(0, keys[1].p, p);
+  const heroGlue = (p: number) => 1 - smooth(0, keys[1].p * 0.7, p);
   const landGlue = (p: number) => smooth(pL2, pTouch, p);
 
   /** the pose at progress p when the page is actually scrolled to `scroll` */
   function evaluate(p: number, scroll: number, out: Pose): Pose {
-    const planned = p * L.s1;
-    const glue = heroGlue(p) + landGlue(p);
-    const sx = T.x(p);
-    // touched down: exactly on the disc, wherever the page is
-    const sy = p >= pTouch ? docks.land(scroll).y : T.y(p) + (planned - scroll) * glue;
+    // near a dock the cup blends onto that surface's REAL position on the page
+    // (pedestal / disc move with the actual scroll, not the smoothed progress)
+    const hg = heroGlue(p);
+    const lg = landGlue(p);
+    let sx = T.x(p);
+    let sy = T.y(p);
+    if (hg > 0) {
+      sx += (H0.x - sx) * hg;
+      sy += (H0.y - scroll - sy) * hg;
+    }
+    if (p >= pTouch) {
+      const d = docks.land(scroll);
+      sx = d.x;
+      sy = d.y;
+    } else if (lg > 0) {
+      const d = docks.land(scroll);
+      sx += (d.x - sx) * lg;
+      sy += (d.y - sy) * lg;
+    }
     const A = T.A(p);
     screenToWorld(cam, L.vw, L.vh, sx, sy, depthFor(A), out.center);
     orient(T.pitch(p), T.yaw(p), T.bank(p), out.quat);

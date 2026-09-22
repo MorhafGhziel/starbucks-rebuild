@@ -301,10 +301,13 @@ html[data-cup='live'] .cup-flight-layer { opacity: 1; }
 .hero__ring { right: 4%; top: 6%; color: var(--fg); --bg: var(--green); --fg: var(--cream); }
 
 @media (max-width: 900px) {
-  .hero { min-height: 0; padding-top: 104px; }
-  .hero__grid { grid-template-columns: 1fr; }
-  .hero__copy { grid-column: 1; grid-row: 1; gap: 20px; }
-  .hero__stage { grid-column: 1; grid-row: 2; height: min(66svh, 560px); min-height: 400px; margin: 8px calc(var(--gutter) * -1) 0; }
+  /* phones and tablets: headline + cup fit one screen; the stage takes what's left */
+  .hero { min-height: 100svh; padding: 92px 0 clamp(40px, 6svh, 64px); align-items: stretch; }
+  .hero__grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: calc(100svh - 92px - clamp(40px, 6svh, 64px)); min-height: 0; }
+  .hero__copy { grid-column: 1; grid-row: 1; gap: 16px; }
+  .hero__title.display { font-size: clamp(40px, 11.5vw, 72px); }
+  .hero__sub { font-size: 16px; }
+  .hero__stage { grid-column: 1; grid-row: 2; height: auto; min-height: 200px; margin: 4px calc(var(--gutter) * -1) 0; }
   .hero__ring { left: auto; right: 6%; bottom: 8%; width: 96px; }
 }
 
@@ -316,24 +319,21 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-stopped { overflow: clip; }
 
 /* ------------------------------------------------------------ cursor */
-.cursor-dot, .cursor-ring { position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 200ms linear; }
-.cursor-dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--c); transition: opacity 200ms linear, width 250ms var(--ease-out), height 250ms var(--ease-out), margin 250ms var(--ease-out); }
-.cursor-ring {
-  width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%;
-  border: 1.5px solid var(--c); display: grid; place-items: center;
-  transition: opacity 200ms linear, width 350ms var(--ease-out), height 350ms var(--ease-out), margin 350ms var(--ease-out), background-color 300ms var(--ease-out), border-color 300ms var(--ease-out);
-}
-.cursor-ring span { font: 700 12px/1 var(--font-sans), sans-serif; letter-spacing: 0.02em; color: var(--c2); opacity: 0; transition: opacity 200ms linear; }
-html { --c: var(--green); --c2: var(--cream); }
-html[data-cursor-ground='green'] { --c: var(--cream); --c2: var(--green); }
-.cursor-ring[data-mode='hot'] { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: color-mix(in oklab, var(--c) 14%, transparent); }
-.cursor-dot[data-mode='hot'] { width: 0; height: 0; margin: 0; }
-.cursor-ring[data-mode='drag'] { width: 72px; height: 72px; margin: -36px 0 0 -36px; background: var(--green); border-color: var(--cream); }
-.cursor-ring[data-mode='drag'] span { color: var(--cream); }
+/* the outer elements only move (inline translate); the inner <i> only scales */
+.cursor-dot, .cursor-ring { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 200ms linear; will-change: transform; }
+.cursor-dot i, .cursor-ring i { position: absolute; left: 0; top: 0; border-radius: 50%; will-change: transform; }
+.cursor-dot i { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: var(--c); transition: transform 300ms var(--ease-out), background-color 300ms linear; }
+.cursor-ring i { width: 40px; height: 40px; margin: -20px 0 0 -20px; border: 1.5px solid var(--c); transition: transform 450ms var(--ease-out), background-color 300ms linear, border-color 300ms linear; }
+.cursor-ring span { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); font: 700 12px/1 var(--font-sans), sans-serif; letter-spacing: 0.02em; color: var(--cream); opacity: 0; transition: opacity 250ms linear; white-space: nowrap; }
+html { --c: var(--green); }
+html[data-cursor-ground='green'] { --c: var(--cream); }
+.cursor-ring[data-mode='hot'] i { transform: scale(1.4); background: color-mix(in oklab, var(--c) 14%, transparent); }
+.cursor-dot[data-mode='hot'] i, .cursor-dot[data-mode='drag'] i { transform: scale(0); }
+.cursor-ring[data-mode='drag'] i { transform: scale(1.8); background: var(--green); border-color: var(--cream); }
 .cursor-ring[data-mode='drag'] span { opacity: 1; }
-.cursor-dot[data-mode='drag'] { width: 0; height: 0; margin: 0; }
 .cursor-ring[data-mode='text'], .cursor-dot[data-mode='text'] { opacity: 0 !important; }
-.cursor-ring.is-down { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+.cursor-ring.is-down i { transform: scale(0.75); }
+.cursor-ring.is-down[data-mode='drag'] i { transform: scale(1.55); }
 @media (pointer: fine) {
   html.has-cursor, html.has-cursor * { cursor: none !important; }
   html.has-cursor input, html.has-cursor textarea { cursor: text !important; }

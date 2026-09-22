@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BlobShadow, blobTexture, Beans, Cup, LandingDisc, Plinth, Sleeve, Studio } from './CupModels';
 import { cupStore } from './cupStore';
 import { measureLayout } from './flight/measure';
-import { CAM_POS, FOV, LAG_PX, PIVOT, buildPlan, clamp01, smooth, type Plan, type Pose } from './flight/plan';
+import { CAM_POS, FOV, PIVOT, buildPlan, lagFor, clamp01, smooth, type Plan, type Pose } from './flight/plan';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -109,7 +109,7 @@ function Rig({ reduced, still, debug, onReady }: { reduced: boolean; still: bool
     // progress: scrubbed by GSAP, but never more than LAG_PX from the page,
     // so fast scrolling can't slide content under a trailing cup
     const raw = clamp01(scroll / L.s1);
-    const lag = LAG_PX / L.s1;
+    const lag = lagFor(L.vh) / L.s1;
     let p = Math.min(raw + lag, Math.max(raw - lag, S.proxy.p));
     if (reduced) p = raw < 0.5 ? 0 : 1;
     cupStore.flight = p;
