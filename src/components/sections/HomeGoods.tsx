@@ -189,7 +189,7 @@ export function HomeGoods() {
       )}
 
       <div className="shell section__foot">
-        <p className="soft body-sm">Prices in USD from shop.starbucks.com, checked 22 Sep 2026.</p>
+        <p className="soft body-sm">Prices from shop.starbucks.com, converted to SAR at the fixed 3.75 rate, checked 22 Sep 2026.</p>
         <Link className="btn btn--line" href="/shop">
           Browse the whole shop
         </Link>

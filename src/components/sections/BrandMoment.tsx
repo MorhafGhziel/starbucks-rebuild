@@ -6,7 +6,7 @@ import { cupStore } from '@/components/three/cupStore';
 import { Icon } from '@/components/ui/Icon';
 import { Wave } from '@/components/ui/Wave';
 import { useBag } from '@/components/bag/BagProvider';
-import { LINKS, goods } from '@/data/content';
+import { LINKS, fmtPrice, goods } from '@/data/content';
 
 const sleeve = goods.find((g) => g.id === 'starbucks-stainless-steel-insulated-sleeve')!;
 
@@ -88,7 +88,7 @@ export function BrandMoment() {
             <p>{caption}</p>
             {sleeveOn && (
               <p className="brand__buy">
-                <span>90% recycled stainless steel. $24.95</span>
+                <span>90% recycled stainless steel. {fmtPrice(sleeve.price)}</span>
                 <button type="button" className="link" onClick={() => bag.add(sleeve.id)}>
                   Add to bag
                 </button>

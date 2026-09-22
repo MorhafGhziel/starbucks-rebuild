@@ -42,7 +42,7 @@ export function ProductDrawer({ product, onClose }: { product: Product | null; o
               </a>
             </div>
             <p className="fine">
-              Price and size from the official Starbucks shop (USD), checked 22 Sep 2026. “Add to bag” keeps a list on this concept page only.
+              Price and size from the official Starbucks shop (US), shown in SAR at the fixed 3.75 rate, checked 22 Sep 2026. “Add to bag” keeps a list on this concept page only.
             </p>
           </div>
         </div>

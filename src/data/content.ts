@@ -129,7 +129,7 @@ export const FAQ = [
   },
   {
     q: 'Can I order or pay on this page?',
-    a: 'No. This is a concept. Drink orders open on starbucks.com, and products open on the official Starbucks shop, where the prices shown here come from (USD, checked 22 Sep 2026).',
+    a: 'No. This is a concept. Drink orders open on starbucks.com, and products open on the official Starbucks shop, where the prices shown here come from (US prices checked 22 Sep 2026, shown in SAR at the fixed 3.75 rate).',
     source: LINKS.order,
   },
 ] as const;
@@ -171,14 +171,16 @@ export const JOURNAL = [
 
 export const SOURCES = [
   ['Drinks, descriptions, calories, caffeine', 'starbucks.com ordering API (the menu page’s own data)', LINKS.menu],
-  ['Product names, sizes, USD prices, product photos', 'shop.starbucks.com product feed', LINKS.shop],
+  ['Product names, sizes, prices (USD, shown in SAR at 3.75), product photos', 'shop.starbucks.com product feed', LINKS.shop],
   ['Tasting notes and roast levels', 'Printed on each bag, read from the official product photos', LINKS.shop],
   ['Siren logo', 'SVG served on starbucks.com, geometry unchanged, recolored', 'https://www.starbucks.com/'],
   ['Coffee journey facts', 'about.starbucks.com stories', LINKS.beanToCup],
   ['Editorial photography', 'about.starbucks.com story images, in their real colors', LINKS.about],
 ] as const;
 
-export const fmtPrice = (p: string) => `$${Number(p).toFixed(2)}`;
+/** SAR at the fixed peg (1 USD = 3.75 SAR), converted from the official US shop price */
+export const SAR_PER_USD = 3.75;
+export const fmtPrice = (p: string) => `SAR ${(Number(p) * SAR_PER_USD).toFixed(2)}`;
 export const fmtDate = (d: string) =>
   new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 

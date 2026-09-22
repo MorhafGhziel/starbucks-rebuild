@@ -64,7 +64,7 @@ export function BagDrawer() {
                   <span>Estimated subtotal</span>
                   <strong>{fmtPrice(String(bag.subtotal))}</strong>
                 </p>
-                <p className="bag__fine">Official shop prices in USD, checked 22 Sep 2026. Tax and shipping are worked out on the shop.</p>
+                <p className="bag__fine">Official US shop prices converted to SAR at the fixed 3.75 rate, checked 22 Sep 2026. Tax and shipping are worked out on the shop.</p>
               </div>
               <a className="btn btn--solid btn--wide" href={LINKS.shop} target="_blank" rel="noreferrer">
                 Go to shop.starbucks.com <Icon name="external" size={18} />

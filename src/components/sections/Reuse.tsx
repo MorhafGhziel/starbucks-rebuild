@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { AddButton } from '@/components/products/ProductCard';
 import { Ring } from '@/components/ui/Ring';
 import { Wave } from '@/components/ui/Wave';
-import { LINKS, goods } from '@/data/content';
+import { LINKS, fmtPrice, goods } from '@/data/content';
 
 const sleeve = goods.find((g) => g.id === 'starbucks-stainless-steel-insulated-sleeve')!;
 const cold = goods.find((g) => g.id === 'starbucks-classic-cold-cup')!;
@@ -53,12 +53,12 @@ export function Reuse() {
         <div className="reuse__buy">
           <div>
             <p className="reuse__name">{sleeve.name}</p>
-            <p className="soft body-sm">$24.95, 16 oz</p>
+            <p className="soft body-sm">{fmtPrice(sleeve.price)}, 16 oz</p>
           </div>
           <AddButton product={sleeve} />
           <div>
             <p className="reuse__name">{cold.name}</p>
-            <p className="soft body-sm">$14.95, 24 oz</p>
+            <p className="soft body-sm">{fmtPrice(cold.price)}, 24 oz</p>
           </div>
           <AddButton product={cold} />
         </div>

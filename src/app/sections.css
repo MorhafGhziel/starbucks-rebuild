@@ -193,7 +193,7 @@
 /* ---------------------------------------------------------------- reuse */
 .reuse__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center; }
 .reuse__copy { grid-column: 1 / span 4; display: grid; gap: 20px; justify-items: start; }
-.reuse__stage { grid-column: 5 / span 8; position: relative; min-height: 580px; }
+.reuse__stage { grid-column: 5 / span 8; position: relative; aspect-ratio: 10 / 9; }
 .reuse__tile { position: absolute; left: 14%; top: 0; width: 46%; aspect-ratio: 4 / 5; border-radius: var(--r-lg); overflow: hidden; }
 .reuse__tile img { object-fit: cover; }
 .reuse__tile--small { left: 56%; top: 34%; width: 26%; transform: rotate(5deg); box-shadow: 0 30px 50px -30px var(--deep); }
@@ -204,13 +204,13 @@
 .callout span { color: var(--soft); }
 .callout--a { left: 64%; top: 2%; }
 .callout--b { left: 85%; top: 42%; max-width: 170px; }
-.callout--c { left: 62%; top: 82%; }
+.callout--c { left: 62%; top: 75%; }
 .reuse__buy { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 16px 24px; margin-top: 48px; padding-top: 24px; border-top: 1.5px solid var(--line); }
 .reuse__name { font-weight: 700; }
 @media (max-width: 1100px) { .callout--b { left: 84%; max-width: 150px; } }
 @media (max-width: 900px) {
   .reuse__copy, .reuse__stage { grid-column: 1 / -1; }
-  .reuse__stage { min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .reuse__stage { min-height: 0; aspect-ratio: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .reuse__tile { position: relative; left: auto; top: auto; width: auto; grid-column: 1 / span 2; }
   .reuse__tile--small { grid-column: 2; margin-top: -45%; width: auto; }
   .reuse__ring { top: 52%; left: 4%; }
