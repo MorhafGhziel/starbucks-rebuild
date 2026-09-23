@@ -273,11 +273,11 @@ export function buildPlan(L: Layout) {
     // 0–10%: lift clear, tilt back, drift aside
     { p: f(0.28), pref: { x: H0.x + (mob ? 10 : 40), y: mob ? H0.y - f(0.28) * L.s1 - L.heroPx * 0.22 : H0.y - L.heroPx * 0.26 }, A: mob ? 1.02 : 1.14, pitch: mob ? -0.1 : -0.2, yaw: mob ? TY * 0.12 : 0.25, bank: mob ? 0.04 : 0.08 },
     // broad arc toward the camera, tumble begins
-    { p: f(0.5), pref: { x: wantedMid, y: L.vh * 0.5 }, A: Abig, pitch: mob ? 0.16 : 1.05, yaw: mob ? TY * 0.4 : 0.5, bank: mob ? -0.08 : -0.26 },
+    { p: f(0.5), pref: mob ? { x: L.vw * 0.3, y: L.vh * 0.62 } : { x: wantedMid, y: L.vh * 0.5 }, A: Abig, pitch: mob ? 0.16 : 1.05, yaw: mob ? TY * 0.4 : 0.5, bank: mob ? -0.08 : -0.26 },
     // upside down, receding
-    { p: f(0.7), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.3, y: L.vh * 0.5 }, A: (Abig + 1) / 2 + 0.05, pitch: mob ? 0.08 : Math.PI, yaw: mob ? TY * 0.68 : 0.2, bank: mob ? -0.04 : -0.1 },
+    { p: f(0.7), pref: mob ? { x: L.vw * 0.42, y: L.vh * 0.68 } : { x: wantedMid + (corr.cx - wantedMid) * 0.3, y: L.vh * 0.5 }, A: (Abig + 1) / 2 + 0.05, pitch: mob ? 0.08 : Math.PI, yaw: mob ? TY * 0.68 : 0.2, bank: mob ? -0.04 : -0.1 },
     // recovering toward upright, steering to the corridor
-    { p: f(0.86), pref: { x: wantedMid + (corr.cx - wantedMid) * 0.75, y: L.vh * 0.46 }, A: (1 + Acor) / 2, pitch: mob ? 0.04 : R * 0.82, yaw: mob ? TY * 0.9 : -0.25, bank: mob ? 0.04 : 0.2 },
+    { p: f(0.86), pref: mob ? { x: L.vw * 0.42 + (corr.cx - L.vw * 0.42) * 0.8, y: L.vh * 0.56 } : { x: wantedMid + (corr.cx - wantedMid) * 0.75, y: L.vh * 0.46 }, A: (1 + Acor) / 2, pitch: mob ? 0.04 : R * 0.82, yaw: mob ? TY * 0.9 : -0.25, bank: mob ? 0.04 : 0.2 },
     // upright, small, beside the grid
     { p: pT, pref: { x: corr.cx, y: L.vh * 0.45 }, A: Acor, pitch: R, yaw: TY - 0.15, bank: 0.04 },
     // gentle S beside the cards
@@ -423,6 +423,67 @@ export function buildPlan(L: Layout) {
     return out;
   }
 
+  /**
+   * Phones / tablets: a separate, fixed choreography driven straight by the
+   * scroll position (no planner, no smoothing):
+   *   hero     the cup rides its pedestal with the page, turning as you scroll
+   *   release  once the hero text has gone it lifts and glides to the right band
+   *   menu     it stays pinned in that band while the drinks pass, still turning
+   *   landing  as "One store" arrives it glides onto the disc, logo to the front
+   */
+  function evaluateMobile(scroll: number, out: Pose): Pose {
+    const vh = L.vh;
+    const H = docks.hero(); // centre on the pedestal, at scroll 0
+    const s1 = L.s1;
+    const sA = Math.max(0, Math.min(s1 * 0.3, H.y - vh * 0.36)); // hero text gone: lift off
+    const sB = Math.min(s1 * 0.5, sA + vh * 0.5); // arrived in the band
+    const sC = Math.max(sB + vh * 0.15, s1 - vh * 0.6); // start the landing glide
+    const bandPx = Math.min(L.heroPx * 0.62, (corr.w - 12) / 0.66);
+    const Ab = bandPx / L.heroPx;
+    const bx = corr.cx;
+    const by = vh * 0.46;
+    let x: number, y: number, A: number, bank = 0;
+    if (scroll <= sA) {
+      x = H.x;
+      y = H.y - scroll;
+      A = 1;
+    } else if (scroll <= sB) {
+      const t = smooth(sA, sB, scroll);
+      x = H.x + (bx - H.x) * t;
+      y = H.y - sA + (by - (H.y - sA)) * t;
+      A = 1 + (Ab - 1) * t;
+      bank = -Math.sin(Math.PI * t) * 0.16;
+    } else if (scroll <= sC) {
+      x = bx;
+      y = by;
+      A = Ab;
+    } else if (scroll < s1) {
+      const t = (scroll - sC) / (s1 - sC);
+      const d = docks.land(scroll);
+      const tx = smooth(0.35, 1, t);
+      const ty = smooth(0, 1, t);
+      x = bx + (d.x - bx) * tx;
+      y = by + (d.y - by) * ty;
+      A = Ab + (Aland - Ab) * smooth(0, 1, t);
+      bank = Math.sin(Math.PI * t) * 0.12;
+    } else {
+      const d = docks.land(scroll);
+      x = d.x;
+      y = d.y;
+      A = Aland;
+    }
+    // one full turn across the whole trip, ending exactly front-on at the disc
+    const yaw = Math.PI * 2 * clamp01(scroll / s1);
+    screenToWorld(cam, L.vw, L.vh, x, y, depthFor(A), out.center);
+    orient(0, yaw, bank, out.quat);
+    out.rock = 0;
+    out.float = 0;
+    out.heroW = 1 - smooth(0, 40, scroll);
+    out.landW = smooth(s1 - 40, s1, scroll);
+    out.dock = scroll < 2 ? 'hero' : scroll >= s1 - 2 ? 'land' : null;
+    return out;
+  }
+
   /** test/debug: projected bounds and collisions at p (page at the planned scroll) */
   function sample(p: number, pad = L.clear * 0.6) {
     const s = p * L.s1;
@@ -449,6 +510,7 @@ export function buildPlan(L: Layout) {
     pTouch,
     keys,
     evaluate,
+    evaluateMobile,
     sample,
     protectAt,
     heroFootWorld: (scroll: number, out: THREE.Vector3) => screenToWorld(cam, L.vw, L.vh, L.heroFoot.x, L.heroFoot.y - scroll, D0, out),

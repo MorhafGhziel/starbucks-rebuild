@@ -71,7 +71,7 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
       scrollTrigger: {
         start: 0,
         end: () => replan(), // re-measured on every ScrollTrigger refresh
-        scrub: reduced ? true : 1.2, // slow, soft follow
+        scrub: reduced || simple ? true : 1.2, // desktop: slow, soft follow; touch: direct
         invalidateOnRefresh: true,
       },
     });
@@ -96,7 +96,7 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
       S.tween?.scrollTrigger?.kill();
       S.tween?.kill();
     };
-  }, [reduced, debug]);
+  }, [reduced, simple, debug]);
 
   const scratch = useRef({ qUser: new THREE.Quaternion(), Y: new THREE.Vector3(0, 1, 0), up: new THREE.Vector3(), down: new THREE.Vector3(), base: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3() });
 
@@ -115,27 +115,11 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
     let p = Math.min(raw + lag, Math.max(raw - lag, S.proxy.p));
     if (reduced) p = raw < 0.5 ? 0 : 1;
 
-    // simple mode (phones / tablets / touch): the cup stays glued to its section
-    // and never trails the scroll. In the hero it turns gently as you scroll;
-    // in "One store" it drops onto its disc with one turn as the section arrives.
-    let extraY = 0;
-    let extraYaw = 0;
-    if (simple) {
-      const landY = L.landFoot.y - scroll;
-      p = landY < L.vh * 1.35 ? 1 : 0;
-      if (!reduced) {
-        if (p === 1) {
-          const e = smooth(L.vh * 1.3, L.vh * 0.6, landY);
-          extraY = (1 - e) * 1.6;
-          extraYaw = (1 - e) * Math.PI * 2;
-        } else {
-          extraYaw = clamp01(scroll / Math.max(1, L.heroFoot.y)) * 1.4;
-        }
-      }
-    }
+    // phones / tablets / touch run their own choreography (evaluateMobile)
+    if (simple) p = raw;
     cupStore.flight = p;
 
-    const P = plan.evaluate(p, scroll, pose.current);
+    const P = simple ? plan.evaluateMobile(scroll, pose.current) : plan.evaluate(p, scroll, pose.current);
     const k = plan.k;
 
     // (no intro move: the 3D cup takes over from the poster in the poster's exact pose)
@@ -146,11 +130,10 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
       const home = Math.round(cupStore.yaw / (Math.PI * 2)) * Math.PI * 2;
       cupStore.yaw = THREE.MathUtils.damp(cupStore.yaw, home, 3, dt);
     }
-    let userYaw = cupStore.yaw * docked + extraYaw;
+    let userYaw = cupStore.yaw * docked;
     if (!cupStore.touched && !reduced && !still) userYaw += Math.sin(clock.elapsedTime * 0.45) * 0.38 * P.heroW;
 
     place.current.position.copy(P.center);
-    place.current.position.y += extraY * k;
     place.current.scale.setScalar(k);
     X.qUser.setFromAxisAngle(X.Y, userYaw);
     orient.current.quaternion.copy(P.quat).multiply(X.qUser);

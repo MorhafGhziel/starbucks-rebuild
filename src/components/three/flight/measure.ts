@@ -24,7 +24,7 @@ export function measureLayout(): Layout | null {
   const brand = doc(document.querySelector('[data-cup-anchor="brand"]'), sy);
   if (!hero || !brand) return null;
 
-  const heroPx = hero.h * (vw < 900 ? 0.7 : 0.58);
+  const heroPx = hero.h * (vw < 900 ? 0.8 : 0.58);
   const heroFoot = { x: hero.x + hero.w / 2, y: hero.y + hero.h * 0.8 };
   const landPx = Math.min(brand.h * 0.6, heroPx * 0.98);
   const landFoot = { x: brand.x + brand.w / 2, y: brand.y + brand.h * 0.82 };
