@@ -338,3 +338,14 @@ html[data-cursor-ground='green'] { --c: var(--cream); }
   html.has-cursor, html.has-cursor * { cursor: none !important; }
   html.has-cursor input, html.has-cursor textarea { cursor: text !important; }
 }
+
+/* home loader: holds the page until the 3D cup is drawn */
+html:has(.loader[data-state='on']) { overflow: hidden; }
+.loader { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: var(--s6); background: var(--cream); transition: opacity 500ms var(--ease), visibility 0s 500ms; }
+.loader[data-state='out'] { opacity: 0; visibility: hidden; }
+.loader svg { animation: loader-breathe 1.6s var(--ease) infinite alternate; }
+.loader__bar { position: relative; width: 72px; height: 2px; border-radius: 2px; overflow: hidden; background: color-mix(in oklab, var(--green) 18%, var(--cream)); }
+.loader__bar::after { content: ''; position: absolute; inset: 0; width: 40%; border-radius: inherit; background: var(--green); animation: loader-slide 1.1s var(--ease) infinite; }
+@keyframes loader-breathe { from { transform: scale(0.96); } to { transform: scale(1); } }
+@keyframes loader-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .loader svg, .loader__bar::after { animation: none; } }
