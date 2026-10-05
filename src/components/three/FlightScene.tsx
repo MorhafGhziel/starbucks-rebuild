@@ -315,6 +315,22 @@ async function warmPMREM(gl: THREE.WebGLRenderer, env: THREE.Texture | null, cam
   // materials stay alive so the cached programs are not released before the real PMREM picks them up
 }
 
+/**
+ * Draws on GSAP's ticker, right after Lenis has moved the page, so the cup
+ * and the page land in the same frame (R3F's own loop could run a frame early).
+ */
+function Driver({ on }: { on: boolean }) {
+  const advance = useThree((s) => s.advance);
+  useEffect(() => {
+    if (!on) return;
+    const draw = () => advance(performance.now());
+    gsap.ticker.add(draw);
+    draw();
+    return () => gsap.ticker.remove(draw);
+  }, [on, advance]);
+  return null;
+}
+
 function Warmup({ onWarm }: { onWarm: () => void }) {
   const { gl, scene, camera } = useThree();
   useEffect(() => {
@@ -358,7 +374,7 @@ export default function FlightScene({ reduced, simple = false, still = false, ac
     <Canvas
       className="cup-flight"
       style={{ pointerEvents: 'none' }}
-      frameloop={active && warm ? 'always' : 'never'}
+      frameloop="never"
       dpr={[1, 1.5]}
       camera={{ fov: FOV, position: CAM_POS.toArray() as [number, number, number], near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'high-performance' }}
@@ -366,6 +382,7 @@ export default function FlightScene({ reduced, simple = false, still = false, ac
     >
       <Studio />
       <Warmup onWarm={onWarm} />
+      <Driver on={active && warm} />
       <Rig reduced={reduced} simple={simple} still={still} debug={debug} onReady={onReady} />
     </Canvas>
   );

@@ -17,7 +17,10 @@ declare global {
 export function SmoothScroll() {
   useEffect(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true });
+    // syncTouch: touch scrolling also runs on this tick, so the 3D cup (drawn
+    // right after it, see FlightScene) and the page move in the same frame.
+    // Native touch scroll ran ahead on the compositor and the cup shook.
+    const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.09 });
     window.__lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     const tick = (t: number) => lenis.raf(t * 1000);
