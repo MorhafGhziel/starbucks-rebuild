@@ -49,7 +49,18 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
   useEffect(() => {
     pedestal.current?.traverse((o) => {
       const m = (o as THREE.Mesh).material as THREE.Material | undefined;
-      if (!m || (o as THREE.Mesh).geometry?.type === 'PlaneGeometry') return;
+      if (!m) return;
+      if ((o as THREE.Mesh).geometry?.type === 'PlaneGeometry') {
+        // its contact shadow too: as a transparent it was drawn after the cup
+        // and, sitting nearer the camera once the cup lifts and recedes (phones),
+        // darkened the cup. Opaque pass + plain alpha blending, after the pedestal.
+        m.transparent = false;
+        m.blending = THREE.CustomBlending;
+        m.blendSrc = THREE.SrcAlphaFactor;
+        m.blendDst = THREE.OneMinusSrcAlphaFactor;
+        o.renderOrder = -0.5;
+        return;
+      }
       m.depthWrite = false;
       o.renderOrder = -1;
     });
