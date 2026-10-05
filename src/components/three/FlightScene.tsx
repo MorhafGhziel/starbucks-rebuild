@@ -1,11 +1,11 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { BlobShadow, blobTexture, Beans, Cup, LandingDisc, Plinth, Sleeve, Studio } from './CupModels';
+import { BlobShadow, blobTexture, Beans, Cup, LandingDisc, Plinth, Sleeve, Studio, wallsReady } from './CupModels';
 import { cupStore } from './cupStore';
 import { measureLayout } from './flight/measure';
 import { CAM_POS, FOV, PIVOT, buildPlan, lagFor, clamp01, smooth, type Plan, type Pose } from './flight/plan';
@@ -58,9 +58,16 @@ function Rig({ reduced, simple, still, debug, onReady }: { reduced: boolean; sim
   // --- measure, plan, and bind progress to scroll
   useEffect(() => {
     const S = shared.current;
+    // ScrollTrigger refreshes several times while the page loads (fonts,
+    // images, its own setup); only an actually different layout is re-planned
+    let key = '';
     const replan = () => {
       const L = measureLayout();
-      if (L) S.plan = buildPlan(L);
+      const next = L ? JSON.stringify(L) : '';
+      if (L && next !== key) {
+        key = next;
+        S.plan = buildPlan(L);
+      }
       return S.plan?.L.s1 ?? 1;
     };
     replan();
@@ -266,18 +273,99 @@ function drawDebug(plan: Plan, p: number, scroll: number) {
   g.fillText(`p ${p.toFixed(3)}  pT ${plan.pT.toFixed(2)}  pC ${plan.pC.toFixed(2)}  ${cur.hits.join(', ')}`, 14, L.vh - 14);
 }
 
+/*
+  Warm-up, before the first frame is drawn (the poster stays up meanwhile):
+  wait for the painted walls, upload them, and compile every shader with
+  KHR_parallel_shader_compile, hidden parts (sleeve) included. Drawing
+  earlier compiled the physical materials synchronously, froze scrolling
+  for seconds and swapped the poster for a half-built cup.
+*/
+type PMREMInternals = THREE.PMREMGenerator & {
+  _setSize(size: number): void;
+  _allocateTargets(): THREE.WebGLRenderTarget;
+  _pingPongRenderTarget: THREE.WebGLRenderTarget;
+  _cubemapMaterial: THREE.ShaderMaterial;
+  _blurMaterial: THREE.ShaderMaterial;
+  _ggxMaterial: THREE.ShaderMaterial;
+  _lodMeshes: THREE.Mesh[];
+};
+/**
+ * The studio light (drei Environment) is turned into a PMREM the first time a
+ * material needs it, and three compiles those two big filter shaders
+ * synchronously (~350 ms). Build the same programs in parallel beforehand so
+ * that step only renders. Same shader source, defines and target → same
+ * cached program.
+ */
+async function warmPMREM(gl: THREE.WebGLRenderer, env: THREE.Texture | null, camera: THREE.Camera) {
+  const img = env && (env as THREE.CubeTexture).isCubeTexture ? (env.image as { width: number }[])[0] : null;
+  if (!img?.width) return;
+  const pm = new THREE.PMREMGenerator(gl) as PMREMInternals;
+  pm._setSize(img.width);
+  const target = pm._allocateTargets();
+  pm.compileCubemapShader();
+  const tmp = new THREE.Scene();
+  for (const m of [pm._cubemapMaterial, pm._blurMaterial, pm._ggxMaterial]) tmp.add(new THREE.Mesh(pm._lodMeshes[0].geometry, m)); // the planes PMREM draws with
+  const prev = gl.getRenderTarget();
+  gl.setRenderTarget(pm._pingPongRenderTarget); // PMREM draws into half-float targets: no tone mapping, linear output
+  const done = gl.compileAsync(tmp, camera);
+  gl.setRenderTarget(prev);
+  await done;
+  target.dispose();
+  pm._pingPongRenderTarget.dispose();
+  // materials stay alive so the cached programs are not released before the real PMREM picks them up
+}
+
+function Warmup({ onWarm }: { onWarm: () => void }) {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let alive = true;
+    wallsReady.then(async () => {
+      if (!alive) return;
+      try {
+        await warmPMREM(gl, scene.environment, camera);
+      } catch {
+        // three internals changed: the PMREM simply compiles on first use
+      }
+      if (!alive) return;
+      const hidden: THREE.Object3D[] = [];
+      scene.traverse((o) => {
+        if (!o.visible) {
+          hidden.push(o);
+          o.visible = true;
+        }
+        const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+        if (m?.map) gl.initTexture(m.map);
+      });
+      try {
+        await gl.compileAsync(scene, camera);
+      } catch {
+        // falls back to compiling on the first frame
+      }
+      hidden.forEach((o) => (o.visible = false));
+      if (alive) onWarm();
+    });
+    return () => {
+      alive = false;
+    };
+  }, [gl, scene, camera, onWarm]);
+  return null;
+}
+
 export default function FlightScene({ reduced, simple = false, still = false, active, onReady, debug }: { reduced: boolean; simple?: boolean; still?: boolean; active: boolean; onReady: () => void; debug: boolean }) {
+  const [warm, setWarm] = useState(false);
+  const onWarm = useCallback(() => setWarm(true), []);
   return (
     <Canvas
       className="cup-flight"
       style={{ pointerEvents: 'none' }}
-      frameloop={active ? 'always' : 'never'}
+      frameloop={active && warm ? 'always' : 'never'}
       dpr={[1, 1.5]}
       camera={{ fov: FOV, position: CAM_POS.toArray() as [number, number, number], near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'high-performance' }}
       onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
     >
       <Studio />
+      <Warmup onWarm={onWarm} />
       <Rig reduced={reduced} simple={simple} still={still} debug={debug} onReady={onReady} />
     </Canvas>
   );

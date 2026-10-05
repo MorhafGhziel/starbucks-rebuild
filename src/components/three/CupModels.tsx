@@ -39,8 +39,19 @@ function useWallTexture(kind: 'cup' | 'sleeve') {
       made?.dispose();
     };
   }, [kind]);
+  // runs after the map is committed to its material
+  useEffect(() => {
+    if (!tex) return;
+    painted.add(kind);
+    if (painted.size === 2) paintedDone();
+  }, [tex, kind]);
   return tex;
 }
+
+const painted = new Set<string>();
+let paintedDone = () => {};
+/** Resolves once both printed walls (cup + sleeve) sit on their materials. */
+export const wallsReady = new Promise<void>((r) => (paintedDone = r));
 
 export function Cup() {
   const wallTex = useWallTexture('cup');
