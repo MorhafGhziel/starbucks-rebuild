@@ -323,7 +323,8 @@ function Driver({ on }: { on: boolean }) {
   const advance = useThree((s) => s.advance);
   useEffect(() => {
     if (!on) return;
-    const draw = () => advance(performance.now());
+    // with frameloop="never" R3F takes this as the clock's elapsed time: seconds, not ms
+    const draw = () => advance(performance.now() / 1000);
     gsap.ticker.add(draw);
     draw();
     return () => gsap.ticker.remove(draw);
