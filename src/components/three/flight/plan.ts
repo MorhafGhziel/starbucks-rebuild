@@ -180,31 +180,47 @@ export function buildPlan(L: Layout) {
   };
 
   /** screen bbox of the whole transformed cup */
+  // solve() probes thousands of centres per pose, so the rotated corners are
+  // kept until the rotation changes (this loop is the whole cost of a plan)
   const q = new THREE.Quaternion();
   const c3 = new THREE.Vector3();
   const w3 = new THREE.Vector3();
+  const fwd = cam.getWorldDirection(new THREE.Vector3());
+  const rc = CORNERS.map(() => new THREE.Vector3());
+  let rotKey: [number, number, number] = [NaN, NaN, NaN];
   function bbox(cx: number, cy: number, A: number, pitch: number, yaw: number, bank: number) {
     const d = depthFor(A);
-    screenToWorld(cam, L.vw, L.vh, cx, cy, d, c3);
-    orient(pitch, yaw, bank, q);
+    _v.set((cx / L.vw) * 2 - 1, -(cy / L.vh) * 2 + 1, 0.5).unproject(cam).sub(cam.position).normalize();
+    c3.copy(cam.position).addScaledVector(_v, d / _v.dot(fwd));
+    if (pitch !== rotKey[0] || yaw !== rotKey[1] || bank !== rotKey[2]) {
+      rotKey = [pitch, yaw, bank];
+      orient(pitch, yaw, bank, q);
+      CORNERS.forEach((c, i) => rc[i].copy(c).multiplyScalar(k).applyQuaternion(q));
+    }
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (const c of CORNERS) {
-      w3.copy(c).multiplyScalar(k).applyQuaternion(q).add(c3);
-      const s = worldToScreen(cam, L.vw, L.vh, w3);
-      x0 = Math.min(x0, s.x); y0 = Math.min(y0, s.y); x1 = Math.max(x1, s.x); y1 = Math.max(y1, s.y);
+    for (const c of rc) {
+      w3.copy(c).add(c3).project(cam);
+      const sx = ((w3.x + 1) / 2) * L.vw;
+      const sy = ((1 - w3.y) / 2) * L.vh;
+      x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy);
     }
     return { x0, y0, x1, y1 };
   }
 
   /** protected rects on screen at scroll s (fixed ones stay put) */
-  const protectAt = (s: number, pad: number) =>
-    L.protect.map((r) => ({
+  let protKey = [NaN, NaN];
+  let protRects: { name: string; x0: number; x1: number; y0: number; y1: number }[] = [];
+  const protectAt = (s: number, pad: number) => {
+    if (s === protKey[0] && pad === protKey[1]) return protRects;
+    protKey = [s, pad];
+    return (protRects = L.protect.map((r) => ({
       name: r.name,
       x0: r.box.x - pad,
       x1: r.box.x + r.box.w + pad,
       y0: r.box.y - (r.fixed ? 0 : s) - pad,
       y1: r.box.y + r.box.h - (r.fixed ? 0 : s) + pad,
-    }));
+    })));
+  };
 
   type Opts = { pedestal?: boolean; bottom?: boolean };
   const hits = (b: { x0: number; y0: number; x1: number; y1: number }, s: number, pad: number, lagPad = 0, edgePad = 0, o: Opts = {}) => {
@@ -228,6 +244,13 @@ export function buildPlan(L: Layout) {
   function solve(p: number, pref: { x: number; y: number }, A: number, rot: [number, number, number], o: Opts = {}) {
     const s = p * L.s1;
     const reach = Math.max(L.vw, L.vh) * 0.7;
+    // the pivot always projects inside the cup's bbox, so a centre that is
+    // itself off the safe area or inside a protected rect is a sure hit:
+    // skip it before projecting anything (same result, a fraction of the work)
+    const rects = protectAt(s, L.clear + 10).filter((r) => r.name !== 'pedestal' || o.pedestal);
+    const blocked = (x: number, y: number) =>
+      x < L.edge + 10 || x > L.vw - L.edge - 10 || y < L.topSafe + 10 || (o.bottom !== false && y > L.vh - L.edge - 10) ||
+      rects.some((r) => x > r.x0 && x < r.x1 && y > r.y0 - lag && y < r.y1 + lag);
     for (let shrink = 0; shrink < 10; shrink++) {
       const a = A * Math.pow(0.92, shrink);
       for (let r = 0; r < reach; r += 8) {
@@ -236,6 +259,7 @@ export function buildPlan(L: Layout) {
           const ang = (i / steps) * Math.PI * 2;
           const x = pref.x + Math.cos(ang) * r;
           const y = pref.y + Math.sin(ang) * r * 0.8;
+          if (blocked(x, y)) continue;
           if (hits(bbox(x, y, a, ...rot), s, L.clear + 10, lag, 10, o).length === 0) return { x, y, A: a };
         }
       }
